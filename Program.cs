@@ -4,23 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace FrankStore
+class Program
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Bitmap img = new Bitmap(args[0]);
+    Image coverImage;
 
-            for(int i = 0; i < img.Height; i++){
-                for(int y = 0; y < img.Width; y++){
-                    Console.WriteLine(y + ", " + i);
-                    Color color = img.GetPixel(y, i);
-                    String result = System.Drawing.ColorTranslator.ToHtml(color);
-                    Console.WriteLine(result);
-                    Console.WriteLine();
-                }
-            }
-         }
+    static void Main(string[] args)
+    {
+        new Program(args);
+    }
+
+    public Program(string[] args){
+        coverImage = new Image(args[0]);
+        Console.WriteLine(coverImage.getPixel(500, 40));
+        Color color = coverImage.getPixel(500, 40);
+        Console.WriteLine(coverImage.getColorHex(color));
+        Console.WriteLine(coverImage.getWidth());
+        Console.WriteLine(coverImage.getHeight());
     }
 }
