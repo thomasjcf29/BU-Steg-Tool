@@ -5,3 +5,7 @@
 /.vs/*
 .vs/*
 .vs
+/bin/Debug/
+/bin/Debug/*
+/obj/Debug
+/obj/Debug/*
