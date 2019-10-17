@@ -8,6 +8,8 @@ using System.IO;
 public class AnswerFile
 {
     private Boolean valid = false;
+    private Boolean readOnly = false;
+
     private FileStream file;
 
     public AnswerFile(String location, Boolean operationMode)
@@ -54,6 +56,7 @@ public class AnswerFile
         try
         {
             file = File.Open(location, FileMode.Open, FileAccess.Read);
+            readOnly = true;
         }
         catch(Exception ex) when (
             ex is ArgumentException
@@ -119,5 +122,10 @@ public class AnswerFile
     {
         file.Close();
         file = null;
+    }
+
+    public Boolean isReadOnly()
+    {
+        return readOnly;
     }
 }
