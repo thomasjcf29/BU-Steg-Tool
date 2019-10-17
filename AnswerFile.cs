@@ -11,7 +11,10 @@ public class AnswerFile
     private Boolean readOnly = false;
 
     private FileStream file;
+    private BinaryWriter bWriter;
+    private BinaryReader bReader;
 
+    //operationMode = true/false (encoding/decoding)
     public AnswerFile(String location, Boolean operationMode)
     {
         checkValid(location, operationMode);
@@ -21,10 +24,12 @@ public class AnswerFile
             if (operationMode)
             {
                 createFile(location);
+                openBinaryWriter();
             }
             else
             {
                 openFile(location);
+                openBinaryReader();
             }
         }
     }
@@ -32,6 +37,67 @@ public class AnswerFile
     public Boolean isValid()
     {
         return valid;
+    }
+
+    public Boolean writeToFile(UInt16 number)
+    {
+        try {
+            bWriter.Write(number);
+            bWriter.Flush();
+            return true;
+        }
+        catch(Exception ex) when 
+        (
+            ex is ArgumentException
+            || ex is ArgumentNullException
+            || ex is ArgumentOutOfRangeException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: There is a problem with the argument entered.");
+            return false;
+        }
+        catch(Exception ex) when
+        (
+            ex is IOException
+            || ex is ObjectDisposedException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: There is a problem with the binary writer.");
+            return false;
+        }
+    }
+
+    public List<Location> readFromFile()
+    {
+        List<Location> list = new List<Location>();
+
+        try
+        {
+            while (bReader.PeekChar() != -1)
+            {
+                //x,y,hashlocation
+                UInt16[] test = new UInt16[3];
+
+                for(int i = 0; i < 3; i++)
+                {
+                    test[i] = bReader.ReadUInt16();
+                }
+
+                Location loc = new Location(test[0], test[1], test[2]);
+
+                list.Add(loc);
+            }
+        }
+        catch(Exception ex) when
+        (
+            ex is IOException
+            || ex is ArgumentException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: Problem reading from file.");
+        }
+
+        return list;
     }
 
     private void checkValid(String location, Boolean operationMode)
@@ -91,6 +157,11 @@ public class AnswerFile
         }
     }
 
+    private void openBinaryReader()
+    {
+        bReader = new BinaryReader(file);
+    }
+
     private void createFile(String location)
     {
         try
@@ -118,8 +189,24 @@ public class AnswerFile
         }
     }
 
+    private void openBinaryWriter()
+    {
+        bWriter = new BinaryWriter(file);
+    }
+
     public void close()
     {
+        if (readOnly)
+        {
+            bReader.Close();
+            bReader = null;
+        }
+        else
+        {
+            bWriter.Close();
+            bWriter = null;
+        }
+
         file.Close();
         file = null;
     }
