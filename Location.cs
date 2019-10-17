@@ -1,6 +1,6 @@
 using System;
 
-class Location
+public class Location
 {
     private UInt16 xLocation;
     private UInt16 yLocation;
