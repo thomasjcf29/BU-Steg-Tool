@@ -8,6 +8,7 @@ using System.IO;
 public class Image
 {
     private Bitmap image;
+
     private Boolean valid = false;
 
     public Image(String location) {
@@ -39,11 +40,11 @@ public class Image
         return valid;
     }
 
-    private Boolean checkValid(String location){
+    private void checkValid(String location){
         if (!File.Exists(location))
         {
             Console.Error.WriteLine("[ERROR]: File does not exist for specified image");
-            return false;
+            return;
         }
 
         try
@@ -53,10 +54,9 @@ public class Image
         catch (ArgumentException)
         {
             Console.Error.WriteLine("[ERROR]: Specified image file is not valid, is it corrupted?");
-            return false;
+            return;
         }
 
         valid = true;
-        return true;
     }
 }
