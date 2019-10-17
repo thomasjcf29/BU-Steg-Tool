@@ -45,6 +45,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="AnswerFile.cs" />
+    <Compile Include="Converter.cs" />
+    <Compile Include="Location.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
