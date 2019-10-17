@@ -13,12 +13,27 @@ class Program
         new Program(args);
     }
 
-    public Program(string[] args){
+    public Program(string[] args)
+    {
+        if(!checkValidation(args))
+        {
+            System.Environment.Exit(100);
+        }
+
         coverImage = new Image(args[0]);
-        Console.WriteLine(coverImage.getPixel(500, 40));
-        Color color = coverImage.getPixel(500, 40);
-        Console.WriteLine(coverImage.getColorHex(color));
-        Console.WriteLine(coverImage.getWidth());
-        Console.WriteLine(coverImage.getHeight());
+
+        if(!coverImage.isValid()){
+            System.Environment.Exit(99);
+        }
+    }
+
+    private Boolean checkValidation(string[] args)
+    {
+        if(args.Length == 0)
+        {
+            Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
+            return false;
+        }
+        return true;
     }
 }
