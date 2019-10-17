@@ -25,13 +25,15 @@ class Program
 
         coverImage = new Image(args[1]);
 
-        if(!coverImage.isValid()){
+        if(!coverImage.isValid())
+        {
             System.Environment.Exit(99);
         }
 
         file = new AnswerFile(args[2], encrypting);
 
-        if(!file.isValid()){
+        if(!file.isValid())
+        {
             System.Environment.Exit(98);
         }
         file.close();
@@ -47,13 +49,16 @@ class Program
         }
 
         //Check to make sure encryption / decryption type is provided.
-        if(args[0].Equals("Encryption", StringComparison.InvariantCultureIgnoreCase)){
+        if(args[0].Equals("Encryption", StringComparison.InvariantCultureIgnoreCase))
+        {
             encrypting = true;
         }
-        else if(args[0].Equals("Decryption", StringComparison.InvariantCultureIgnoreCase)){
+        else if(args[0].Equals("Decryption", StringComparison.InvariantCultureIgnoreCase))
+        {
             encrypting = false;
         }
-        else{
+        else
+        {
             displayArguments();
             return false;
         }
