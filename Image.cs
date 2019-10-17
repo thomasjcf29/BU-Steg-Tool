@@ -11,23 +11,7 @@ public class Image
     private Boolean valid = false;
 
     public Image(String location) {
-        if (!File.Exists(location))
-        {
-            Console.Error.WriteLine("[ERROR]: File does not exist for specified image");
-            return;
-        }
-
-        try
-        {
-            image = new Bitmap(location);
-        }
-        catch (ArgumentException e)
-        {
-            Console.Error.WriteLine("[ERROR]: Specified image file is not valid, is it corrupted?");
-            return;
-        }
-
-        valid = true;
+        checkValid(location);
     }
 
     public Color getPixel(int width, int height)
@@ -53,5 +37,26 @@ public class Image
     public Boolean isValid()
     {
         return valid;
+    }
+
+    private Boolean checkValid(String location){
+        if (!File.Exists(location))
+        {
+            Console.Error.WriteLine("[ERROR]: File does not exist for specified image");
+            return false;
+        }
+
+        try
+        {
+            image = new Bitmap(location);
+        }
+        catch (ArgumentException)
+        {
+            Console.Error.WriteLine("[ERROR]: Specified image file is not valid, is it corrupted?");
+            return false;
+        }
+
+        valid = true;
+        return true;
     }
 }
