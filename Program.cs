@@ -31,9 +31,21 @@ class Program
     {
         if(args.Length == 0)
         {
-            Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
+            displayArguments();
+            return false;
+        }
+        else if(args.Length == 1)
+        {
+            displayArguments();
             return false;
         }
         return true;
+    }
+
+    private void displayArguments()
+    {
+        Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
+        Console.Error.WriteLine("The correct arguments are:");
+        Console.Error.WriteLine("FrankStore.exe <coverImage> <enc/dec file>");
     }
 }
