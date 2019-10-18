@@ -12,6 +12,8 @@ public class Image
     private Boolean valid = false;
 
     public Image(String location) {
+        Console.WriteLine("Trying to open specified image cover.");
+
         checkValid(location);
     }
 

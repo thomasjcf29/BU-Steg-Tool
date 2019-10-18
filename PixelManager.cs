@@ -19,27 +19,23 @@ public class PixelManager
 
     public PixelManager(FrankEncoding enc)
     {
+        Console.WriteLine("Initialising pixel manager.");
+
         encoder = enc;
 
-        Image image = encoder.getParent().getImage();
-
-        imageWidth = image.getWidth();
-        imageHeight = image.getHeight();
-
-        if((imageWidth * imageHeight) < 10)
-        {
-            Console.Error.WriteLine("[ERROR]: The image does not have more than 10 pixels.");
-            return;
-        }
-
-        valid = true;
-
-        //Choose Initial Pixels
-        choosePixels(10);
+        //Setup Class Params
+        setupClass();
 
         //Setup Manager For Each Letter
         setupHexCharacters();
-    }
+
+        //Choose Initial Pixels
+        Console.WriteLine("Choosing 10 random pixels (this may increase later on).");
+        addPixels(10);
+        Console.WriteLine("");
+
+        valid = true;
+    } 
 
     public Boolean isValid()
     {
@@ -56,8 +52,26 @@ public class PixelManager
         return pixelMap.Values.ToList();
     }
 
-    private void choosePixels(int amount)
+    public List<Location> encode(String message)
     {
+        List<Location> locations = new List<Location>();
+        
+        foreach(char c in message)
+        {
+            locations.Add(characterBreakdown[c.ToString()].chooseHexCharacter());
+        }
+
+        return locations;
+    }
+
+    public void addPixels(int amount)
+    {
+        if(((pixelMap.Count() + 1) + amount) > getImageSize())
+        {
+            Console.Error.WriteLine("[ERROR]: This image is not large enough to hide the data, please start again with a bigger image.");
+            System.Environment.Exit(97);
+        }
+
         using (RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider())
         {
             for (int i = 0; i < amount; i++)
@@ -87,13 +101,45 @@ public class PixelManager
                     //If it's duplicated we need a different one
                     catch(ArgumentException)
                     {
+                        Console.Write(".");
                         continue;
                     }
+
+                    Console.Write("+");
 
                     invalid = false;
 
                 } while (invalid);
             }
+
+            updateHexCharacters();
+        }
+    }
+
+    private int getImageSize()
+    {
+        return imageWidth * imageHeight;
+    }
+
+    private void updateHexCharacters()
+    {
+        foreach(HexCharacter hex in characterBreakdown.Values.ToList())
+        {
+            hex.updatePixels();
+        }
+    }
+
+    private void setupClass()
+    {
+        Image image = encoder.getParent().getImage();
+
+        imageWidth = image.getWidth();
+        imageHeight = image.getHeight();
+
+        if ((imageWidth * imageHeight) < 10)
+        {
+            Console.Error.WriteLine("[ERROR]: The image does not have more than 10 pixels.");
+            return;
         }
     }
 

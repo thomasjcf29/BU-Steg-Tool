@@ -21,6 +21,8 @@ public class Program
 
     public Program(string[] args)
     {
+        Console.WriteLine("Welcome To FrankStore!");
+
         if(!checkValidation(args))
         {
             System.Environment.Exit(100);
@@ -42,15 +44,21 @@ public class Program
 
         if(encoding)
         {
-            encoder = new FrankEncoding(this, args[3]);
+            Console.WriteLine("You have chosen to encode a file.");
+
+            encoder = new FrankEncoding(this);
+            file.writeToFile(encoder.encode(args[3]));
         }
         
         else
         {
-            decoder = new FrankDecoding(this, args[3]);
+            Console.WriteLine("You have chosen to decode a file.");
+
+            decoder = new FrankDecoding(this, );
         }
 
         file.close();
+        Console.WriteLine("Operation completed, closing.");
     }
     
     public AnswerFile getAnswerFile()

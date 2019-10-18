@@ -17,6 +17,8 @@ public class AnswerFile
     //operationMode = true/false (encoding/decoding)
     public AnswerFile(String location, Boolean operationMode)
     {
+        Console.WriteLine("Creating/reading encode/decode file.");
+
         checkValid(location, operationMode);
 
         if (isValid())
@@ -37,34 +39,6 @@ public class AnswerFile
     public Boolean isValid()
     {
         return valid;
-    }
-
-    public Boolean writeToFile(UInt16 number)
-    {
-        try {
-            bWriter.Write(number);
-            bWriter.Flush();
-            return true;
-        }
-        catch(Exception ex) when 
-        (
-            ex is ArgumentException
-            || ex is ArgumentNullException
-            || ex is ArgumentOutOfRangeException
-        )
-        {
-            Console.Error.WriteLine("[ERROR]: There is a problem with the argument entered.");
-            return false;
-        }
-        catch(Exception ex) when
-        (
-            ex is IOException
-            || ex is ObjectDisposedException
-        )
-        {
-            Console.Error.WriteLine("[ERROR]: There is a problem with the binary writer.");
-            return false;
-        }
     }
 
     public List<Location> readFromFile()
@@ -120,6 +94,18 @@ public class AnswerFile
     public Boolean isReadOnly()
     {
         return readOnly;
+    }
+
+    public void writeToFile(List<Location> locations)
+    {
+        Console.WriteLine("Writing to file");
+        foreach(Location l in locations)
+        {
+            writeToFile(l.getX());
+            writeToFile(l.getY());
+            writeToFile(l.getHashLocation());
+        }
+        Console.WriteLine("");
     }
 
     private void checkValid(String location, Boolean operationMode)
@@ -219,5 +205,37 @@ public class AnswerFile
     private void openBinaryWriter()
     {
         bWriter = new BinaryWriter(file);
+    }
+
+    private void writeToFile(UInt16 number)
+    {
+        try {
+            bWriter.Write(number);
+            bWriter.Flush();
+            Console.Write("+");
+        }
+        catch(Exception ex) when 
+        (
+            ex is ArgumentException
+            || ex is ArgumentNullException
+            || ex is ArgumentOutOfRangeException
+        )
+        {
+            Console.Write("-");
+            Console.WriteLine("");
+            Console.Error.WriteLine("[ERROR]: There is a problem with the argument entered.");
+            System.Environment.Exit(93);
+        }
+        catch(Exception ex) when
+        (
+            ex is IOException
+            || ex is ObjectDisposedException
+        )
+        {
+            Console.Write("-");
+            Console.WriteLine("");
+            Console.Error.WriteLine("[ERROR]: There is a problem with the binary writer.");
+            System.Environment.Exit(92);
+        }
     }
 }

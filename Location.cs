@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 public class Location
 {
@@ -11,6 +14,13 @@ public class Location
         xLocation = x;
         yLocation = y;
         hashLocation = hashLoc;
+    }
+
+    public Location(int x, int y, int hashLoc)
+    {
+        xLocation = Convert.ToUInt16(x);
+        yLocation = Convert.ToUInt16(y);
+        hashLocation = Convert.ToUInt16(hashLoc);
     }
 
     public UInt16 getX()
@@ -41,5 +51,17 @@ public class Location
     public void setHashLocation(UInt16 hash)
     {
         hashLocation = hash;
+    }
+
+    public string toString()
+    {
+        return new StringBuilder()
+                                .Append("X: ")
+                                .Append(xLocation.ToString())
+                                .Append(", Y: ")
+                                .Append(yLocation.ToString())
+                                .Append(", Hash: ")
+                                .Append(hashLocation.ToString())
+                                .ToString();
     }
 }

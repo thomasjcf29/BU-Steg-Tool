@@ -41,6 +41,28 @@ public class PixelInformation
         return count;
     }
 
+    public Location getLetterLocation(String letter)
+    {
+        int amountToSkip = getUsedLetterCount(letter);
+        int hashLocation = getHashLocation(letter, amountToSkip);
+
+        if((getLetterCount(letter) <= 0) || (hashLocation == -1))
+        {
+            Console.Error.WriteLine("[ERROR]: System miscalculated, do not trust this encoding.");
+            System.Environment.Exit(94);
+        }
+
+        usedCharacters.Add(letter);
+        leftCharacters.Remove(letter);
+
+        return new Location(x, y, hashLocation);
+    }
+
+    public string getLetter(int number)
+    {
+        return hash.ToCharArray()[number].ToString();
+    }
+
     private void getImageInformation()
     {
         Image image = parent.getParent().getParent().getImage();
@@ -67,5 +89,39 @@ public class PixelInformation
         {
             leftCharacters.Add(c.ToString());
         }
+    }
+
+    private int getUsedLetterCount(String letter)
+    {
+        int count = 0;
+
+        foreach(String s in usedCharacters)
+        {
+            if (s.Equals(letter)) count++;
+        }
+
+        return count;
+    }
+
+    private int getHashLocation(string letter, int skipBy)
+    {
+        int count = 0;
+        int skipCount = 0;
+
+        foreach(Char c in hash)
+        {
+            if (c.ToString().Equals(letter))
+            {
+                if(skipCount >= skipBy)
+                {
+                    return count;
+                }
+
+                skipCount++;
+            }
+            count++;
+        }
+
+        return -1;
     }
 }

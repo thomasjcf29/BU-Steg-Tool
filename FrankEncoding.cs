@@ -11,8 +11,10 @@ public class FrankEncoding
 
     private Boolean valid = false;
 
-    public FrankEncoding(Program parent, String message)
+    public FrankEncoding(Program parent)
     {
+        Console.WriteLine("Initialising encoder.");
+
         this.parent = parent;
         manager = new PixelManager(this);
 
@@ -20,6 +22,17 @@ public class FrankEncoding
         {
             valid = true;
         }
+    }
+
+    public List<Location> encode(String message)
+    {
+        String encodedMessage = Converter.asciiToHex(message);
+        
+        Console.WriteLine("Choosing which pixels to use, this could take a very long time!");
+        List<Location> locations = manager.encode(encodedMessage);
+        Console.WriteLine("");
+
+        return locations;
     }
 
     public Program getParent()
