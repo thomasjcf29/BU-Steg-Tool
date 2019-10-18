@@ -15,10 +15,15 @@ public class Converter
 
         foreach (byte b in inputBytes)
         {
-            sb.Append(string.Format("{0:x2}", b));
+            sb.Append(string.Format("{0:X2}", b));
         }
 
         return sb.ToString();
+    }
+
+    public static string intToHex(int input)
+    {
+        return input.ToString("X");
     }
 
     public static string hexToAscii(string input)
