@@ -100,6 +100,28 @@ public class AnswerFile
         return list;
     }
 
+    public void close()
+    {
+        if (readOnly)
+        {
+            bReader.Close();
+            bReader = null;
+        }
+        else
+        {
+            bWriter.Close();
+            bWriter = null;
+        }
+
+        file.Close();
+        file = null;
+    }
+
+    public Boolean isReadOnly()
+    {
+        return readOnly;
+    }
+
     private void checkValid(String location, Boolean operationMode)
     {
         if (File.Exists(location) && operationMode)
@@ -124,7 +146,8 @@ public class AnswerFile
             file = File.Open(location, FileMode.Open, FileAccess.Read);
             readOnly = true;
         }
-        catch(Exception ex) when (
+        catch(Exception ex) when
+        (
             ex is ArgumentException
             || ex is ArgumentNullException
             || ex is PathTooLongException
@@ -133,7 +156,8 @@ public class AnswerFile
             Console.Error.WriteLine("[ERROR]: Decryption filename is invalid, please change it.");
             valid = false;
         }
-        catch(Exception ex) when (
+        catch(Exception ex) when
+        (
             ex is IOException
             || ex is UnauthorizedAccessException
         )
@@ -141,7 +165,8 @@ public class AnswerFile
             Console.Error.WriteLine("[ERROR]: There is a problem reading the file, please check your permissions.");
             valid = false;
         }
-        catch (Exception ex) when (
+        catch (Exception ex) when
+        (
             ex is ArgumentOutOfRangeException
             || ex is FileNotFoundException
             || ex is NotSupportedException
@@ -168,7 +193,8 @@ public class AnswerFile
         {
             file = File.Create(location);
         }
-        catch(Exception ex) when (
+        catch(Exception ex) when
+        (
             ex is UnauthorizedAccessException
             || ex is IOException
         )
@@ -176,7 +202,8 @@ public class AnswerFile
             Console.Error.WriteLine("[ERROR]: You do not have permission to create a file here.");
             valid = false;
         }
-        catch(Exception ex) when (
+        catch(Exception ex) when
+        (
             ex is ArgumentException
             || ex is ArgumentNullException
             || ex is PathTooLongException
@@ -192,27 +219,5 @@ public class AnswerFile
     private void openBinaryWriter()
     {
         bWriter = new BinaryWriter(file);
-    }
-
-    public void close()
-    {
-        if (readOnly)
-        {
-            bReader.Close();
-            bReader = null;
-        }
-        else
-        {
-            bWriter.Close();
-            bWriter = null;
-        }
-
-        file.Close();
-        file = null;
-    }
-
-    public Boolean isReadOnly()
-    {
-        return readOnly;
     }
 }

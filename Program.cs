@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-class Program
+public class Program
 {
     private Image coverImage;
     private AnswerFile file;
