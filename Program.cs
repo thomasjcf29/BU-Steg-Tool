@@ -9,7 +9,10 @@ public class Program
     private Image coverImage;
     private AnswerFile file;
 
-    private Boolean encrypting;
+    private FrankEncoding encoder;
+    private FrankDecoding decoder;
+
+    private Boolean encoding;
 
     static void Main(string[] args)
     {
@@ -30,32 +33,48 @@ public class Program
             System.Environment.Exit(99);
         }
 
-        file = new AnswerFile(args[2], encrypting);
+        file = new AnswerFile(args[2], encoding);
 
         if(!file.isValid())
         {
             System.Environment.Exit(98);
         }
+
+        if(encoding)
+        {
+            encoder = new FrankEncoding(this, args[3]);
+        }
+        
+        else
+        {
+            decoder = new FrankDecoding(this, args[3]);
+        }
+
         file.close();
+    }
+    
+    public AnswerFile getAnswerFile()
+    {
+        return file;
     }
 
     private Boolean checkValidation(string[] args)
     {
         //Check to make sure all arguments are provided
-        if(args.Length != 3)
+        if(args.Length != 4)
         {
             displayArguments();
             return false;
         }
 
-        //Check to make sure encryption / decryption type is provided.
-        if(args[0].Equals("Encryption", StringComparison.InvariantCultureIgnoreCase))
+        //Check to make sure encoding / decoding type is provided.
+        if(args[0].Equals("Encoding", StringComparison.InvariantCultureIgnoreCase))
         {
-            encrypting = true;
+            encoding = true;
         }
-        else if(args[0].Equals("Decryption", StringComparison.InvariantCultureIgnoreCase))
+        else if(args[0].Equals("Decoding", StringComparison.InvariantCultureIgnoreCase))
         {
-            encrypting = false;
+            encoding = false;
         }
         else
         {
@@ -70,6 +89,6 @@ public class Program
     {
         Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
         Console.Error.WriteLine("The correct arguments are:");
-        Console.Error.WriteLine("FrankStore.exe <encryption/decryption> <coverImage> <enc/dec file>");
+        Console.Error.WriteLine("FrankStore.exe <encoding/decoding> <coverImage> <enc/dec file> <message to encode>");
     }
 }

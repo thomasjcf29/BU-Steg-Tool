@@ -6,5 +6,10 @@ using System.Drawing;
 
 public class FrankDecoding
 {
+    private Program parent;
 
+    public FrankDecoding(Program parent, String message)
+    {
+        this.parent = parent;
+    }
 }
