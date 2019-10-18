@@ -11,5 +11,12 @@ public class FrankEncoding
     public FrankEncoding(Program parent, String message)
     {
         this.parent = parent;
+
+        new PixelInformation(this, 500, 400);
+    }
+
+    public Program getParent()
+    {
+        return parent;
     }
 }

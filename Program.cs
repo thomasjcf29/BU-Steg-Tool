@@ -58,6 +58,11 @@ public class Program
         return file;
     }
 
+    public Image getImage()
+    {
+        return coverImage;
+    }
+
     private Boolean checkValidation(string[] args)
     {
         //Check to make sure all arguments are provided

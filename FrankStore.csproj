@@ -49,6 +49,7 @@
     <Compile Include="Location.cs" />
     <Compile Include="FrankEncoding.cs" />
     <Compile Include="FrankDecoding.cs" />
+    <Compile Include="PixelInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
