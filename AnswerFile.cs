@@ -43,24 +43,27 @@ public class AnswerFile
 
     public List<Location> readFromFile()
     {
+        Console.WriteLine("Reading from file.");
+
         List<Location> list = new List<Location>();
 
         try
         {
-            while (bReader.PeekChar() != -1)
-            {
+           while(bReader.BaseStream.Position < bReader.BaseStream.Length)
+           {
                 //x,y,hashlocation
                 UInt16[] test = new UInt16[3];
 
-                for(int i = 0; i < 3; i++)
+                for(int x = 0; x < 3; x++)
                 {
-                    test[i] = bReader.ReadUInt16();
+                    Console.Write("+");
+                    test[x] = bReader.ReadUInt16();
                 }
 
                 Location loc = new Location(test[0], test[1], test[2]);
 
                 list.Add(loc);
-            }
+           }
         }
         catch(Exception ex) when
         (
@@ -68,8 +71,12 @@ public class AnswerFile
             || ex is ArgumentException
         )
         {
+            Console.Write("-");
             Console.Error.WriteLine("[ERROR]: Problem reading from file.");
         }
+
+        Console.WriteLine("");
+        Console.WriteLine("File has been read.");
 
         return list;
     }

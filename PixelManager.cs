@@ -9,6 +9,7 @@ using System.IO;
 public class PixelManager
 {
     private FrankEncoding encoder;
+    private FrankDecoding decoder;
 
     private int imageWidth;
     private int imageHeight;
@@ -24,7 +25,7 @@ public class PixelManager
         encoder = enc;
 
         //Setup Class Params
-        setupClass();
+        setupClass(true);
 
         //Setup Manager For Each Letter
         setupHexCharacters();
@@ -37,6 +38,18 @@ public class PixelManager
         valid = true;
     } 
 
+    public PixelManager(FrankDecoding dec)
+    {
+        Console.WriteLine("Initialising pixel manager.");
+
+        decoder = dec;
+
+        //Setup Class Params
+        setupClass(false);
+
+        valid = true;
+    }
+
     public Boolean isValid()
     {
         return valid;
@@ -45,6 +58,11 @@ public class PixelManager
     public FrankEncoding getParent()
     {
         return encoder;
+    }
+
+    public FrankDecoding getParentDecoder()
+    {
+        return decoder;
     }
 
     public List<PixelInformation> getPixels()
@@ -62,6 +80,45 @@ public class PixelManager
         }
 
         return locations;
+    }
+
+    public string decode(List<Location> locations)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        foreach(Location loc in locations)
+        {
+            int x = Convert.ToInt32(loc.getX());
+            int y = Convert.ToInt32(loc.getY());
+            int hashLocation = Convert.ToInt32(loc.getHashLocation());
+
+            if((x >= imageWidth) || (y >= imageHeight) || (hashLocation >= 128))
+            {
+                Console.WriteLine("-");
+                Console.Error.WriteLine("[ERROR]: Decode file has invalid sizes.");
+                System.Environment.Exit(91);
+            }
+
+            Console.Write("+");
+
+            String key = x.ToString() + "-" + y.ToString();
+
+            PixelInformation px;
+
+            try{
+                px = pixelMap[key];
+            }
+            catch(KeyNotFoundException)
+            {
+                px = new PixelInformation(this, x, y);
+            }
+
+            sb.Append(px.getLetter(hashLocation));
+        }
+
+        Console.WriteLine("");
+
+        return sb.ToString();
     }
 
     public void addPixels(int amount)
@@ -129,9 +186,18 @@ public class PixelManager
         }
     }
 
-    private void setupClass()
+    private void setupClass(Boolean encoding)
     {
-        Image image = encoder.getParent().getImage();
+        Image image;
+
+        if(encoding)
+        {
+            image = encoder.getParent().getImage();
+        }
+        else
+        {
+            image = decoder.getParent().getImage();
+        }
 
         imageWidth = image.getWidth();
         imageHeight = image.getHeight();

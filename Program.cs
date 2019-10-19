@@ -47,14 +47,25 @@ public class Program
             Console.WriteLine("You have chosen to encode a file.");
 
             encoder = new FrankEncoding(this);
-            file.writeToFile(encoder.encode(args[3]));
+
+            if(encoder.isValid()){
+                file.writeToFile(encoder.encode(args[3]));
+            }
         }
         
         else
         {
             Console.WriteLine("You have chosen to decode a file.");
 
-            decoder = new FrankDecoding(this, );
+            decoder = new FrankDecoding(this);
+
+            if(decoder.isValid())
+            {
+                List<Location> locations = file.readFromFile();
+                string message = decoder.decoder(locations);
+                Console.WriteLine("Decoding complete, message is:");
+                Console.WriteLine(message);
+            }
         }
 
         file.close();
@@ -74,7 +85,7 @@ public class Program
     private Boolean checkValidation(string[] args)
     {
         //Check to make sure all arguments are provided
-        if(args.Length != 4)
+        if(args.Length < 3)
         {
             displayArguments();
             return false;
@@ -83,6 +94,11 @@ public class Program
         //Check to make sure encoding / decoding type is provided.
         if(args[0].Equals("Encoding", StringComparison.InvariantCultureIgnoreCase))
         {
+            if(args.Length != 4)
+            {
+                displayArguments();
+                return false;
+            }
             encoding = true;
         }
         else if(args[0].Equals("Decoding", StringComparison.InvariantCultureIgnoreCase))
@@ -102,6 +118,6 @@ public class Program
     {
         Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
         Console.Error.WriteLine("The correct arguments are:");
-        Console.Error.WriteLine("FrankStore.exe <encoding/decoding> <coverImage> <enc/dec file> <message to encode>");
+        Console.Error.WriteLine("FrankStore.exe <encoding/decoding> <coverImage> <enc/dec file> [message to encode]");
     }
 }

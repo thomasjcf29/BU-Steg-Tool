@@ -27,7 +27,7 @@ public class FrankEncoding
     public List<Location> encode(String message)
     {
         String encodedMessage = Converter.asciiToHex(message);
-        
+
         Console.WriteLine("Choosing which pixels to use, this could take a very long time!");
         List<Location> locations = manager.encode(encodedMessage);
         Console.WriteLine("");
