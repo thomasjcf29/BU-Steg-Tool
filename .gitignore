@@ -9,3 +9,7 @@
 /bin/Debug/*
 /obj/Debug
 /obj/Debug/*
+/bin/Release/
+/bin/Release/*
+/obj/Release
+/obj/Release/*

@@ -1,0 +1,248 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Drawing;
+using System.IO;
+
+public class AnswerFile
+{
+    private Boolean valid = false;
+    private Boolean readOnly = false;
+
+    private FileStream file;
+    private BinaryWriter bWriter;
+    private BinaryReader bReader;
+
+    //operationMode = true/false (encoding/decoding)
+    public AnswerFile(String location, Boolean operationMode)
+    {
+        Console.WriteLine("Creating/reading encode/decode file.");
+
+        checkValid(location, operationMode);
+
+        if (isValid())
+        {
+            if (operationMode)
+            {
+                createFile(location);
+                openBinaryWriter();
+            }
+            else
+            {
+                openFile(location);
+                openBinaryReader();
+            }
+        }
+    }
+
+    public Boolean isValid()
+    {
+        return valid;
+    }
+
+    public List<Location> readFromFile()
+    {
+        Console.WriteLine("Reading from file.");
+
+        List<Location> list = new List<Location>();
+
+        try
+        {
+           while(bReader.BaseStream.Position < bReader.BaseStream.Length)
+           {
+                //x,y,hashlocation
+                UInt16[] test = new UInt16[3];
+
+                for(int x = 0; x < 3; x++)
+                {
+                    Console.Write("+");
+                    test[x] = bReader.ReadUInt16();
+                }
+
+                Location loc = new Location(test[0], test[1], test[2]);
+
+                list.Add(loc);
+           }
+        }
+        catch(Exception ex) when
+        (
+            ex is IOException
+            || ex is ArgumentException
+        )
+        {
+            Console.Write("-");
+            Console.Error.WriteLine("[ERROR]: Problem reading from file.");
+        }
+
+        Console.WriteLine("");
+        Console.WriteLine("File has been read.");
+
+        return list;
+    }
+
+    public void close()
+    {
+        if (readOnly)
+        {
+            bReader.Close();
+            bReader = null;
+        }
+        else
+        {
+            bWriter.Close();
+            bWriter = null;
+        }
+
+        file.Close();
+        file = null;
+    }
+
+    public Boolean isReadOnly()
+    {
+        return readOnly;
+    }
+
+    public void writeToFile(List<Location> locations)
+    {
+        Console.WriteLine("Writing to file");
+        foreach(Location l in locations)
+        {
+            writeToFile(l.getX());
+            writeToFile(l.getY());
+            writeToFile(l.getHashLocation());
+        }
+        Console.WriteLine("");
+    }
+
+    private void checkValid(String location, Boolean operationMode)
+    {
+        if (File.Exists(location) && operationMode)
+        {
+            Console.Error.WriteLine("[ERROR]: Output file already exists, please change the output name.");
+            return;
+        }
+
+        else if(!File.Exists(location) && !operationMode)
+        {
+            Console.Error.WriteLine("[ERROR]: Decryption file does not exist, please check.");
+            return;
+        }
+
+        valid = true;
+    }
+
+    private void openFile(String location)
+    {
+        try
+        {
+            file = File.Open(location, FileMode.Open, FileAccess.Read);
+            readOnly = true;
+        }
+        catch(Exception ex) when
+        (
+            ex is ArgumentException
+            || ex is ArgumentNullException
+            || ex is PathTooLongException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: Decryption filename is invalid, please change it.");
+            valid = false;
+        }
+        catch(Exception ex) when
+        (
+            ex is IOException
+            || ex is UnauthorizedAccessException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: There is a problem reading the file, please check your permissions.");
+            valid = false;
+        }
+        catch (Exception ex) when
+        (
+            ex is ArgumentOutOfRangeException
+            || ex is FileNotFoundException
+            || ex is NotSupportedException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: The decryption file likely does not exist, please recheck it.");
+            valid = false;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            Console.Error.WriteLine("[ERROR]: The directory specified was not found.");
+            valid = false;
+        }
+    }
+
+    private void openBinaryReader()
+    {
+        bReader = new BinaryReader(file);
+    }
+
+    private void createFile(String location)
+    {
+        try
+        {
+            file = File.Create(location);
+        }
+        catch(Exception ex) when
+        (
+            ex is UnauthorizedAccessException
+            || ex is IOException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: You do not have permission to create a file here.");
+            valid = false;
+        }
+        catch(Exception ex) when
+        (
+            ex is ArgumentException
+            || ex is ArgumentNullException
+            || ex is PathTooLongException
+            || ex is DirectoryNotFoundException
+            || ex is NotSupportedException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: Invalid file name/path.");
+            valid = false;
+        }
+    }
+
+    private void openBinaryWriter()
+    {
+        bWriter = new BinaryWriter(file);
+    }
+
+    private void writeToFile(UInt16 number)
+    {
+        try {
+            bWriter.Write(number);
+            bWriter.Flush();
+            Console.Write("+");
+        }
+        catch(Exception ex) when 
+        (
+            ex is ArgumentException
+            || ex is ArgumentNullException
+            || ex is ArgumentOutOfRangeException
+        )
+        {
+            Console.Write("-");
+            Console.WriteLine("");
+            Console.Error.WriteLine("[ERROR]: There is a problem with the argument entered.");
+            System.Environment.Exit(93);
+        }
+        catch(Exception ex) when
+        (
+            ex is IOException
+            || ex is ObjectDisposedException
+        )
+        {
+            Console.Write("-");
+            Console.WriteLine("");
+            Console.Error.WriteLine("[ERROR]: There is a problem with the binary writer.");
+            System.Environment.Exit(92);
+        }
+    }
+}

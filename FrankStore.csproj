@@ -39,9 +39,19 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.drawing.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="Image.cs" />
+    <Compile Include="AnswerFile.cs" />
+    <Compile Include="Converter.cs" />
+    <Compile Include="Location.cs" />
+    <Compile Include="FrankEncoding.cs" />
+    <Compile Include="FrankDecoding.cs" />
+    <Compile Include="PixelInformation.cs" />
+    <Compile Include="PixelManager.cs" />
+    <Compile Include="HexCharacter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
