@@ -9,10 +9,21 @@ public class StegFileManager
 {
     private Boolean valid = false;
     private FILE_TYPE action;
+    private SteganographyManager.ACTION parent_action;
+
+    //If Buffered Stream
+    private int totalRead = 0;
+    private Boolean fileRead = false;
 
     private FileStream file;
+    
+    //The encode/decode files are read/written in binary.
     private BinaryWriter bWriter;
     private BinaryReader bReader;
+    
+    //The file to encode / the output is read/written as a byte stream.
+    private BufferedStream bStream;
+
     private SteganographyManager parent;
 
     public enum FILE_TYPE {READ_FILE, WRITE_FILE};
@@ -20,19 +31,20 @@ public class StegFileManager
     public StegFileManager(SteganographyManager parent, FILE_TYPE type, String location)
     {
         this.parent = parent;
+        parent_action = parent.getAction();
         action = type;
 
-        if(parent.getAction() == SteganographyManager.ACTION.ENCODING && action == FILE_TYPE.READ_FILE)
+        if(parent_action == SteganographyManager.ACTION.ENCODING && action == FILE_TYPE.READ_FILE)
         {
             Console.WriteLine("Opening file to encode.");
             checkValid(location, false);
             if(isValid())
             {
                 openFile(location);
-                openBinaryReader();
+                openBufferedStream();
             }
         }
-        else if(parent.getAction() == SteganographyManager.ACTION.DECODING && action == FILE_TYPE.READ_FILE)
+        else if(parent_action == SteganographyManager.ACTION.DECODING && action == FILE_TYPE.READ_FILE)
         {
             Console.WriteLine("Opening file to decode.");
             checkValid(location, false);
@@ -42,7 +54,7 @@ public class StegFileManager
                 openBinaryReader();
             }   
         }
-        else
+        else if(parent_action == SteganographyManager.ACTION.ENCODING && action == FILE_TYPE.WRITE_FILE)
         {
             Console.WriteLine("Creating file to write to.");
             checkValid(location, true);
@@ -50,6 +62,16 @@ public class StegFileManager
             {
                 createFile(location);
                 openBinaryWriter();
+            }  
+        }
+        else if(parent_action == SteganographyManager.ACTION.DECODING && action == FILE_TYPE.WRITE_FILE)
+        {
+            Console.WriteLine("Creating file to write to.");
+            checkValid(location, true);
+            if(isValid())
+            {
+                createFile(location);
+                openBufferedStream();
             }  
         }
     }
@@ -61,28 +83,87 @@ public class StegFileManager
 
     public void close()
     {
-        if(action == FILE_TYPE.READ_FILE)
+        if(parent_action == SteganographyManager.ACTION.ENCODING && action == FILE_TYPE.READ_FILE)
+        {
+            bStream.Close();
+            bStream = null;
+        }
+        else if(parent_action == SteganographyManager.ACTION.DECODING && action == FILE_TYPE.READ_FILE)
         {
             bReader.Close();
             bReader = null;
         }
-        else
+        else if(parent_action == SteganographyManager.ACTION.ENCODING && action == FILE_TYPE.WRITE_FILE)
         {
             bWriter.Close();
             bWriter = null;
+        }
+        else if(parent_action == SteganographyManager.ACTION.DECODING && action == FILE_TYPE.WRITE_FILE)
+        {
+            bStream.Close();
+            bStream = null;
         }
 
         file.Close();
         file = null;
     }
 
+    public byte[] getBytes()
+    {
+        if(action == FILE_TYPE.WRITE_FILE)
+        {
+            throw new ArgumentException("You cannot read from a file opened in write mode. (or rather, you shouldn't be.)");
+        }
+
+        if(parent_action != SteganographyManager.ACTION.ENCODING)
+        {
+            throw new ArgumentException("You cannot retrieve bytes on a binary reader!");
+        }
+
+        byte[] receivedData = new byte[4096];
+        byte[] actualData;
+
+        int numBytesToRead = receivedData.Length;
+
+        int count = 0;
+
+        while (numBytesToRead > 0)
+        {
+            // Read may return anything from 0 to numBytesToRead.
+            int n = bStream.Read(receivedData, 0, receivedData.Length);
+            // The end of the file is reached.
+            if (n == 0)
+            {
+                fileRead = true;
+                break;
+            }
+
+            totalRead += n;
+            numBytesToRead -= n;
+            count += n;
+        }
+
+        actualData = new byte[count];
+        Array.Copy(receivedData, actualData, actualData.Length);
+
+        return actualData;
+    }
+
+    public Boolean isFileRead()
+    {
+        return fileRead;
+    }
+
     public void writeToFile(List<Location> locations)
     {
-        Console.WriteLine("Writing to file");
-
         if(action == FILE_TYPE.READ_FILE)
         {
             throw new ArgumentException("You cannot write to a file opened in read mode.");
+        }
+
+        if(parent_action == SteganographyManager.ACTION.DECODING)
+        {
+            throw new ArgumentException("You cannot write to a file opened in binary stream mode.");
         }
 
         foreach(Location l in locations)
@@ -91,7 +172,8 @@ public class StegFileManager
             writeToFile(l.getY());
             writeToFile(l.getHashLocation());
         }
-        Console.WriteLine("");
+
+        bWriter.Flush();
     }
 
     public void writeToFile(String hex)
@@ -102,6 +184,47 @@ public class StegFileManager
         {
             throw new ArgumentException("You cannot write to a file opened in read mode.");
         }
+    }
+
+    public List<Location> getLocations()
+    {
+        if(action == FILE_TYPE.WRITE_FILE)
+        {
+            throw new ArgumentException("You cannot read from a file opened in write mode. (or rather, you shouldn't be.)");
+        }
+
+        if(parent_action != SteganographyManager.ACTION.DECODING)
+        {
+            throw new ArgumentException("You cannot retrieve binary from a byte reader!");
+        }
+
+        byte[] receivedData = new byte[4096];
+        byte[] actualData;
+
+        int numBytesToRead = receivedData.Length;
+
+        int count = 0;
+
+        while (numBytesToRead > 0)
+        {
+            // Read may return anything from 0 to numBytesToRead.
+            int n = bStream.Read(receivedData, 0, receivedData.Length);
+            // The end of the file is reached.
+            if (n == 0)
+            {
+                fileRead = true;
+                break;
+            }
+
+            totalRead += n;
+            numBytesToRead -= n;
+            count += n;
+        }
+
+        actualData = new byte[count];
+        Array.Copy(receivedData, actualData, actualData.Length);
+
+        return actualData;
     }
 
     private void checkValid(String location, Boolean operationMode)
@@ -208,12 +331,15 @@ public class StegFileManager
         bWriter = new BinaryWriter(file);
     }
 
+    private void openBufferedStream()
+    {
+        bStream = new BufferedStream(file);
+    }
+
     private void writeToFile(UInt16 number)
     {
         try {
             bWriter.Write(number);
-            bWriter.Flush();
-            Console.Write("+");
         }
         catch(Exception ex) when 
         (
@@ -222,8 +348,6 @@ public class StegFileManager
             || ex is ArgumentOutOfRangeException
         )
         {
-            Console.Write("-");
-            Console.WriteLine("");
             Console.Error.WriteLine("[ERROR]: There is a problem with the argument entered.");
             System.Environment.Exit(93);
         }
@@ -233,8 +357,6 @@ public class StegFileManager
             || ex is ObjectDisposedException
         )
         {
-            Console.Write("-");
-            Console.WriteLine("");
             Console.Error.WriteLine("[ERROR]: There is a problem with the binary writer.");
             System.Environment.Exit(92);
         }

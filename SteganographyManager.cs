@@ -51,6 +51,16 @@ public class SteganographyManager
         valid = state;
     }
 
+    protected StegFileManager getInputFile()
+    {
+        return input;
+    }
+
+    protected StegFileManager getOutputFile()
+    {
+        return output;
+    }
+
     private void createImage(String imageLocation)
     {
         coverImage = new Image(imageLocation);

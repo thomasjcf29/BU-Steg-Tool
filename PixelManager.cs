@@ -32,8 +32,8 @@ public class PixelManager
             setupHexCharacters();
 
             //Choose Initial Pixels
-            Console.WriteLine("Choosing 10 random pixels (this may increase later on).");
-            addPixels(10);
+            Console.WriteLine("Choosing 1000 random pixels (this may increase later on).");
+            addPixels(1000);
             Console.WriteLine("");
         }
 
@@ -165,9 +165,29 @@ public class PixelManager
 
     private void updateHexCharacters()
     {
-        foreach(HexCharacter hex in characterBreakdown.Values.ToList())
+        List<PixelInformation>[] overall = new List<PixelInformation>[16];
+
+        for(int i = 0; i < 16; i++)
         {
-            hex.updatePixels();
+            overall[i] = new List<PixelInformation>();
+        }
+
+        foreach(PixelInformation pi in pixelMap.Values.ToList())
+        {
+            int[] count = pi.getLetterCount();
+
+            for(int i = 0; i < 16; i ++)
+            {
+                for(int y = 0; y < count[i]; y++)
+                {
+                    overall[i].Add(pi);
+                }
+            }
+        }
+
+        for(int i = 0; i < 16; i++)
+        {
+            characterBreakdown[Converter.intToHex(i)].updatePixels(overall[i]);
         }
     }
 

@@ -26,10 +26,20 @@ public class FrankEncoding : SteganographyManager
 
     public void encode()
     {
-        //String encodedMessage = Converter.asciiToHex("hello");
+        DateTime startTime = DateTime.Now;
 
-        //Console.WriteLine("Choosing which pixels to use, this could take a very long time!");
-        //List<Location> locations = manager.encode(encodedMessage);
-        //Console.WriteLine(locations.ToString());
+        Console.WriteLine("Reading the file and generating the pixels, this may take a while!");
+
+        while(!(getInputFile().isFileRead()))
+        {
+            String hex = Converter.byteToHex(getInputFile().getBytes());
+
+            List<Location> locations = manager.encode(hex);
+            getOutputFile().writeToFile(locations);
+        }
+
+        double totalTime = (DateTime.Now - startTime).TotalMinutes;
+
+        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " minutes");
     }
 }

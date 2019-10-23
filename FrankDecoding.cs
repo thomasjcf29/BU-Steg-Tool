@@ -26,7 +26,20 @@ public class FrankDecoding : SteganographyManager
 
     public void decode()
     {
-        //Console.WriteLine("Decoding file, this may take a while!");
+        DateTime startTime = DateTime.Now;
+
+        Console.WriteLine("Decoding and writing file, this may take a while!");
+
+        while(!(getInputFile().isFileRead()))
+        {
+            List<Location> locations = getInputFile().getBytes();
+        }
+
+        double totalTime = (DateTime.Now - startTime).TotalMinutes;
+
+        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " minutes");
+
+        //Console.WriteLine("");
         //String hex = manager.decode(locations);
         //Console.WriteLine("Hex has been retreived.");
 
