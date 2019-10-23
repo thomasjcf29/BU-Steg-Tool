@@ -5,34 +5,52 @@ using System.Text;
 using System.Drawing;
 using System.IO;
 
-public class AnswerFile
+public class StegFileManager
 {
     private Boolean valid = false;
-    private Boolean readOnly = false;
+    private FILE_TYPE action;
 
     private FileStream file;
     private BinaryWriter bWriter;
     private BinaryReader bReader;
+    private SteganographyManager parent;
 
-    //operationMode = true/false (encoding/decoding)
-    public AnswerFile(String location, Boolean operationMode)
+    public enum FILE_TYPE {READ_FILE, WRITE_FILE};
+
+    public StegFileManager(SteganographyManager parent, FILE_TYPE type, String location)
     {
-        Console.WriteLine("Creating/reading encode/decode file.");
+        this.parent = parent;
+        action = type;
 
-        checkValid(location, operationMode);
-
-        if (isValid())
+        if(parent.getAction() == SteganographyManager.ACTION.ENCODING && action == FILE_TYPE.READ_FILE)
         {
-            if (operationMode)
-            {
-                createFile(location);
-                openBinaryWriter();
-            }
-            else
+            Console.WriteLine("Opening file to encode.");
+            checkValid(location, false);
+            if(isValid())
             {
                 openFile(location);
                 openBinaryReader();
             }
+        }
+        else if(parent.getAction() == SteganographyManager.ACTION.DECODING && action == FILE_TYPE.READ_FILE)
+        {
+            Console.WriteLine("Opening file to decode.");
+            checkValid(location, false);
+            if(isValid())
+            {
+                openFile(location);
+                openBinaryReader();
+            }   
+        }
+        else
+        {
+            Console.WriteLine("Creating file to write to.");
+            checkValid(location, true);
+            if(isValid())
+            {
+                createFile(location);
+                openBinaryWriter();
+            }  
         }
     }
 
@@ -41,49 +59,9 @@ public class AnswerFile
         return valid;
     }
 
-    public List<Location> readFromFile()
-    {
-        Console.WriteLine("Reading from file.");
-
-        List<Location> list = new List<Location>();
-
-        try
-        {
-           while(bReader.BaseStream.Position < bReader.BaseStream.Length)
-           {
-                //x,y,hashlocation
-                UInt16[] test = new UInt16[3];
-
-                for(int x = 0; x < 3; x++)
-                {
-                    Console.Write("+");
-                    test[x] = bReader.ReadUInt16();
-                }
-
-                Location loc = new Location(test[0], test[1], test[2]);
-
-                list.Add(loc);
-           }
-        }
-        catch(Exception ex) when
-        (
-            ex is IOException
-            || ex is ArgumentException
-        )
-        {
-            Console.Write("-");
-            Console.Error.WriteLine("[ERROR]: Problem reading from file.");
-        }
-
-        Console.WriteLine("");
-        Console.WriteLine("File has been read.");
-
-        return list;
-    }
-
     public void close()
     {
-        if (readOnly)
+        if(action == FILE_TYPE.READ_FILE)
         {
             bReader.Close();
             bReader = null;
@@ -98,14 +76,15 @@ public class AnswerFile
         file = null;
     }
 
-    public Boolean isReadOnly()
-    {
-        return readOnly;
-    }
-
     public void writeToFile(List<Location> locations)
     {
         Console.WriteLine("Writing to file");
+
+        if(action == FILE_TYPE.READ_FILE)
+        {
+            throw new ArgumentException("You cannot write to a file opened in read mode.");
+        }
+
         foreach(Location l in locations)
         {
             writeToFile(l.getX());
@@ -113,6 +92,16 @@ public class AnswerFile
             writeToFile(l.getHashLocation());
         }
         Console.WriteLine("");
+    }
+
+    public void writeToFile(String hex)
+    {
+        Console.WriteLine("Writing to file");
+
+        if(action == FILE_TYPE.READ_FILE)
+        {
+            throw new ArgumentException("You cannot write to a file opened in read mode.");
+        }
     }
 
     private void checkValid(String location, Boolean operationMode)
@@ -125,7 +114,7 @@ public class AnswerFile
 
         else if(!File.Exists(location) && !operationMode)
         {
-            Console.Error.WriteLine("[ERROR]: Decryption file does not exist, please check.");
+            Console.Error.WriteLine("[ERROR]: Input file does not exist, please check.");
             return;
         }
 
@@ -137,7 +126,6 @@ public class AnswerFile
         try
         {
             file = File.Open(location, FileMode.Open, FileAccess.Read);
-            readOnly = true;
         }
         catch(Exception ex) when
         (
@@ -146,8 +134,9 @@ public class AnswerFile
             || ex is PathTooLongException
         )
         {
-            Console.Error.WriteLine("[ERROR]: Decryption filename is invalid, please change it.");
+            Console.Error.WriteLine("[ERROR]: Input filename is invalid, please change it.");
             valid = false;
+            System.Environment.Exit(88);
         }
         catch(Exception ex) when
         (
@@ -157,6 +146,7 @@ public class AnswerFile
         {
             Console.Error.WriteLine("[ERROR]: There is a problem reading the file, please check your permissions.");
             valid = false;
+            System.Environment.Exit(87);
         }
         catch (Exception ex) when
         (
@@ -165,13 +155,15 @@ public class AnswerFile
             || ex is NotSupportedException
         )
         {
-            Console.Error.WriteLine("[ERROR]: The decryption file likely does not exist, please recheck it.");
+            Console.Error.WriteLine("[ERROR]: The input file likely does not exist, please recheck it.");
             valid = false;
+            System.Environment.Exit(86);
         }
         catch (DirectoryNotFoundException)
         {
             Console.Error.WriteLine("[ERROR]: The directory specified was not found.");
             valid = false;
+            System.Environment.Exit(85);
         }
     }
 
@@ -194,6 +186,7 @@ public class AnswerFile
         {
             Console.Error.WriteLine("[ERROR]: You do not have permission to create a file here.");
             valid = false;
+            System.Environment.Exit(89);
         }
         catch(Exception ex) when
         (
@@ -206,6 +199,7 @@ public class AnswerFile
         {
             Console.Error.WriteLine("[ERROR]: Invalid file name/path.");
             valid = false;
+            System.Environment.Exit(90);
         }
     }
 

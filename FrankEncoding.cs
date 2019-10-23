@@ -4,44 +4,32 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-public class FrankEncoding
+public class FrankEncoding : SteganographyManager
 {
-    private Program parent;
     private PixelManager manager;
 
-    private Boolean valid = false;
-
-    public FrankEncoding(Program parent)
+    public FrankEncoding(String coverFile, String inputFile, String outputFile)
+        : base(coverFile, SteganographyManager.ACTION.ENCODING, inputFile, outputFile)
     {
-        Console.WriteLine("Initialising encoder.");
-
-        this.parent = parent;
-        manager = new PixelManager(this);
-
-        if(manager.isValid())
+        if(isValid())
         {
-            valid = true;
+            Console.WriteLine("Initialising encoder.");
+
+            manager = new PixelManager(this);
+
+            if(!manager.isValid())
+            {
+                setValid(false);
+            }
         }
     }
 
-    public List<Location> encode(String message)
+    public void encode()
     {
-        String encodedMessage = Converter.asciiToHex(message);
+        //String encodedMessage = Converter.asciiToHex("hello");
 
-        Console.WriteLine("Choosing which pixels to use, this could take a very long time!");
-        List<Location> locations = manager.encode(encodedMessage);
-        Console.WriteLine("");
-
-        return locations;
-    }
-
-    public Program getParent()
-    {
-        return parent;
-    }
-
-    public Boolean isValid()
-    {
-        return valid;
+        //Console.WriteLine("Choosing which pixels to use, this could take a very long time!");
+        //List<Location> locations = manager.encode(encodedMessage);
+        //Console.WriteLine(locations.ToString());
     }
 }

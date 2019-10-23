@@ -65,16 +65,7 @@ public class PixelInformation
 
     private void getImageInformation()
     {
-        Image image;
-
-        if(parent.getParent() == null)
-        {
-            image = parent.getParentDecoder().getParent().getImage();
-        }
-        else
-        {
-            image = parent.getParent().getParent().getImage();
-        }
+        Image image = parent.getParent().getImage();
 
         Color color = image.getPixel(x, y);
         hexColor = image.getColorHex(color);

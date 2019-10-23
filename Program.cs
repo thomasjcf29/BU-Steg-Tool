@@ -6,12 +6,6 @@ using System.Drawing;
 
 public class Program
 {
-    private Image coverImage;
-    private AnswerFile file;
-
-    private FrankEncoding encoder;
-    private FrankDecoding decoder;
-
     private Boolean encoding;
 
     static void Main(string[] args)
@@ -28,80 +22,54 @@ public class Program
             System.Environment.Exit(100);
         }
 
-        coverImage = new Image(args[1]);
+        runTasks(args[1], args[2], args[3]);
 
-        if(!coverImage.isValid())
-        {
-            System.Environment.Exit(99);
-        }
+        Console.WriteLine("Operation completed, closing.");
+    }
 
-        file = new AnswerFile(args[2], encoding);
-
-        if(!file.isValid())
-        {
-            System.Environment.Exit(98);
-        }
-
+    private void runTasks(String coverFile, String inputFile, String outputFile)
+    {
         if(encoding)
         {
             Console.WriteLine("You have chosen to encode a file.");
 
-            encoder = new FrankEncoding(this);
+            FrankEncoding encoder = new FrankEncoding(coverFile, inputFile, outputFile);
 
-            if(encoder.isValid()){
-                file.writeToFile(encoder.encode(args[3]));
+            if(encoder.isValid())
+            {
+                encoder.encode();
+                encoder.close();
             }
         }
-        
         else
         {
             Console.WriteLine("You have chosen to decode a file.");
 
-            decoder = new FrankDecoding(this);
+            FrankDecoding decoder = new FrankDecoding(coverFile, inputFile, outputFile);
 
             if(decoder.isValid())
             {
-                List<Location> locations = file.readFromFile();
-                string message = decoder.decoder(locations);
-                Console.WriteLine("Decoding complete, message is:");
-                Console.WriteLine(message);
+                decoder.decode();
+                decoder.close();
             }
         }
-
-        file.close();
-        Console.WriteLine("Operation completed, closing.");
-    }
-    
-    public AnswerFile getAnswerFile()
-    {
-        return file;
-    }
-
-    public Image getImage()
-    {
-        return coverImage;
     }
 
     private Boolean checkValidation(string[] args)
     {
         //Check to make sure all arguments are provided
-        if(args.Length < 3)
+        if(args.Length != 4)
         {
             displayArguments();
             return false;
         }
 
         //Check to make sure encoding / decoding type is provided.
-        if(args[0].Equals("Encoding", StringComparison.InvariantCultureIgnoreCase))
+        if(args[0].Equals("encode", StringComparison.InvariantCultureIgnoreCase))
         {
-            if(args.Length != 4)
-            {
-                displayArguments();
-                return false;
-            }
             encoding = true;
         }
-        else if(args[0].Equals("Decoding", StringComparison.InvariantCultureIgnoreCase))
+        else if(args[0].Equals("decode", StringComparison.InvariantCultureIgnoreCase))
         {
             encoding = false;
         }
@@ -118,6 +86,7 @@ public class Program
     {
         Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
         Console.Error.WriteLine("The correct arguments are:");
-        Console.Error.WriteLine("FrankStore.exe <encoding/decoding> <coverImage> <enc/dec file> [message to encode]");
+        Console.Error.WriteLine("To encode: FrankStore.exe encode <coverImage> <fileToEncode> <outputFile>");
+        Console.Error.WriteLine("To decode: FrankStore.exe decode <coverImage> <fileToDecode> <outputFile>");
     }
 }
