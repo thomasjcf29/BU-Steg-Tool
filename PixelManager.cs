@@ -8,8 +8,7 @@ using System.IO;
 
 public class PixelManager
 {
-    private FrankEncoding encoder;
-    private FrankDecoding decoder;
+    private SteganographyManager parent;
 
     private int imageWidth;
     private int imageHeight;
@@ -18,34 +17,25 @@ public class PixelManager
     Dictionary<String, HexCharacter> characterBreakdown = new Dictionary<String, HexCharacter>();
     Dictionary<String, PixelInformation> pixelMap = new Dictionary<String, PixelInformation>();
 
-    public PixelManager(FrankEncoding enc)
+    public PixelManager(SteganographyManager managaer)
     {
         Console.WriteLine("Initialising pixel manager.");
 
-        encoder = enc;
+        parent = managaer;
 
         //Setup Class Params
         setupClass(true);
 
-        //Setup Manager For Each Letter
-        setupHexCharacters();
+        if(parent.getAction() == SteganographyManager.ACTION.ENCODING)
+        {
+            //Setup Manager For Each Letter
+            setupHexCharacters();
 
-        //Choose Initial Pixels
-        Console.WriteLine("Choosing 10 random pixels (this may increase later on).");
-        addPixels(10);
-        Console.WriteLine("");
-
-        valid = true;
-    } 
-
-    public PixelManager(FrankDecoding dec)
-    {
-        Console.WriteLine("Initialising pixel manager.");
-
-        decoder = dec;
-
-        //Setup Class Params
-        setupClass(false);
+            //Choose Initial Pixels
+            Console.WriteLine("Choosing 1000 random pixels (this may increase later on).");
+            addPixels(1000);
+            Console.WriteLine("");
+        }
 
         valid = true;
     }
@@ -55,14 +45,9 @@ public class PixelManager
         return valid;
     }
 
-    public FrankEncoding getParent()
+    public SteganographyManager getParent()
     {
-        return encoder;
-    }
-
-    public FrankDecoding getParentDecoder()
-    {
-        return decoder;
+        return parent;
     }
 
     public List<PixelInformation> getPixels()
@@ -88,18 +73,16 @@ public class PixelManager
 
         foreach(Location loc in locations)
         {
+
             int x = Convert.ToInt32(loc.getX());
             int y = Convert.ToInt32(loc.getY());
             int hashLocation = Convert.ToInt32(loc.getHashLocation());
 
             if((x >= imageWidth) || (y >= imageHeight) || (hashLocation >= 128))
             {
-                Console.WriteLine("-");
                 Console.Error.WriteLine("[ERROR]: Decode file has invalid sizes.");
                 System.Environment.Exit(91);
             }
-
-            Console.Write("+");
 
             String key = x.ToString() + "-" + y.ToString();
 
@@ -111,12 +94,11 @@ public class PixelManager
             catch(KeyNotFoundException)
             {
                 px = new PixelInformation(this, x, y);
+                pixelMap.Add(key, px);
             }
 
             sb.Append(px.getLetter(hashLocation));
         }
-
-        Console.WriteLine("");
 
         return sb.ToString();
     }
@@ -158,11 +140,8 @@ public class PixelManager
                     //If it's duplicated we need a different one
                     catch(ArgumentException)
                     {
-                        Console.Write(".");
                         continue;
                     }
-
-                    Console.Write("+");
 
                     invalid = false;
 
@@ -180,24 +159,35 @@ public class PixelManager
 
     private void updateHexCharacters()
     {
-        foreach(HexCharacter hex in characterBreakdown.Values.ToList())
+        List<PixelInformation>[] overall = new List<PixelInformation>[16];
+
+        for(int i = 0; i < 16; i++)
         {
-            hex.updatePixels();
+            overall[i] = new List<PixelInformation>();
+        }
+
+        foreach(PixelInformation pi in pixelMap.Values.ToList())
+        {
+            int[] count = pi.getLetterCount();
+
+            for(int i = 0; i < 16; i ++)
+            {
+                for(int y = 0; y < count[i]; y++)
+                {
+                    overall[i].Add(pi);
+                }
+            }
+        }
+
+        for(int i = 0; i < 16; i++)
+        {
+            characterBreakdown[Converter.intToHex(i)].updatePixels(overall[i]);
         }
     }
 
     private void setupClass(Boolean encoding)
     {
-        Image image;
-
-        if(encoding)
-        {
-            image = encoder.getParent().getImage();
-        }
-        else
-        {
-            image = decoder.getParent().getImage();
-        }
+        Image image = parent.getImage();
 
         imageWidth = image.getWidth();
         imageHeight = image.getHeight();

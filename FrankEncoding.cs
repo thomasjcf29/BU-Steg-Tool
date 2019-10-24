@@ -4,44 +4,42 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-public class FrankEncoding
+public class FrankEncoding : SteganographyManager
 {
-    private Program parent;
     private PixelManager manager;
 
-    private Boolean valid = false;
-
-    public FrankEncoding(Program parent)
+    public FrankEncoding(String coverFile, String inputFile, String outputFile)
+        : base(coverFile, SteganographyManager.ACTION.ENCODING, inputFile, outputFile)
     {
-        Console.WriteLine("Initialising encoder.");
-
-        this.parent = parent;
-        manager = new PixelManager(this);
-
-        if(manager.isValid())
+        if(isValid())
         {
-            valid = true;
+            Console.WriteLine("Initialising encoder.");
+
+            manager = new PixelManager(this);
+
+            if(!manager.isValid())
+            {
+                setValid(false);
+            }
         }
     }
 
-    public List<Location> encode(String message)
+    public void encode()
     {
-        String encodedMessage = Converter.asciiToHex(message);
+        DateTime startTime = DateTime.Now;
 
-        Console.WriteLine("Choosing which pixels to use, this could take a very long time!");
-        List<Location> locations = manager.encode(encodedMessage);
-        Console.WriteLine("");
+        Console.WriteLine("Reading the file and generating the pixels, this may take a while!");
 
-        return locations;
-    }
+        while(!(getInputFile().isFileRead()))
+        {
+            String hex = Converter.byteToHex(getInputFile().getBytes());
 
-    public Program getParent()
-    {
-        return parent;
-    }
+            List<Location> locations = manager.encode(hex);
+            getOutputFile().writeToFile(locations);
+        }
 
-    public Boolean isValid()
-    {
-        return valid;
+        double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
+
+        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
     }
 }

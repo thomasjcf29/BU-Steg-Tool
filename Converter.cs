@@ -7,13 +7,11 @@ using System.IO;
 
 public class Converter
 {   
-    public static string asciiToHex(string input)
+    public static string byteToHex(byte[] input)
     {
         StringBuilder sb = new StringBuilder();
 
-        byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-
-        foreach (byte b in inputBytes)
+        foreach (byte b in input)
         {
             sb.Append(string.Format("{0:X2}", b));
         }
@@ -21,9 +19,25 @@ public class Converter
         return sb.ToString();
     }
 
+    public static byte[] hexToByte(String input)
+    {
+        int charNumber = input.Length;
+        byte[] bytes = new byte[charNumber / 2];
+        for(int i = 0; i < charNumber; i += 2)
+        {
+            bytes[i/2] = Convert.ToByte(input.Substring(i, 2), 16);
+        }
+        return bytes;
+    }
+
     public static string intToHex(int input)
     {
         return input.ToString("X");
+    }
+
+    public static int hexToInt(string input)
+    {
+        return int.Parse(input, System.Globalization.NumberStyles.HexNumber);
     }
 
     public static string hexToAscii(string input)

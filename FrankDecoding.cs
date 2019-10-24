@@ -4,46 +4,41 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-public class FrankDecoding
+public class FrankDecoding : SteganographyManager
 {
-    private Program parent;
     private PixelManager manager;
 
-    private Boolean valid = false;
-
-    public FrankDecoding(Program parent)
+    public FrankDecoding(String coverFile, String inputFile, String outputFile)
+        : base(coverFile, SteganographyManager.ACTION.DECODING, inputFile, outputFile)
     {
-        Console.WriteLine("Initialising decoder.");
-
-        this.parent = parent;
-        manager = new PixelManager(this);
-
-        if(manager.isValid())
+        if(isValid())
         {
-            valid = true;
+            Console.WriteLine("Initialising decoder.");
+
+            manager = new PixelManager(this);
+
+            if(!manager.isValid())
+            {
+                setValid(false);
+            }
         }
     }
 
-    public String decoder(List<Location> locations)
+    public void decode()
     {
-        Console.WriteLine("Decoding file, this may take a while!");
-        string hex = manager.decode(locations);
-        Console.WriteLine("Hex has been retreived.");
+        DateTime startTime = DateTime.Now;
 
-        Console.WriteLine("Converting back to ASCII.");
-        string ascii = Converter.hexToAscii(hex);
-        Console.WriteLine("Done.");
-        
-        return ascii;
-    }
+        Console.WriteLine("Decoding and writing file, this may take a while!");
 
-    public Program getParent()
-    {
-        return parent;
-    }
+        while(!(getInputFile().isFileRead()))
+        {
+            List<Location> locations = getInputFile().getLocations();
+            byte[] bytes = Converter.hexToByte(manager.decode(locations));
+            getOutputFile().writeToFile(bytes);
+        }
 
-    public Boolean isValid()
-    {
-        return valid;
+        double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
+
+        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
     }
 }

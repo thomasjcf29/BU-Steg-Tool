@@ -53,7 +53,7 @@ public class Location
         hashLocation = hash;
     }
 
-    public string toString()
+    public override String ToString()
     {
         return new StringBuilder()
                                 .Append("X: ")

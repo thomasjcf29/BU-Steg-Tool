@@ -18,23 +18,12 @@ public class HexCharacter
     {
         parent = par;
         letter = let;
-
-        updatePixels();
     }
 
-    public void updatePixels()
+    public void updatePixels(List<PixelInformation> px)
     {
         pixels.Clear();
-
-        foreach (PixelInformation pixel in parent.getPixels())
-        {
-            int count = pixel.getLetterCount(letter);
-
-            for(int i = 0; i < count; i++)
-            {
-                pixels.Add(pixel);
-            }
-        }
+        pixels = px;
     }
 
     public Location chooseHexCharacter()
@@ -59,9 +48,8 @@ public class HexCharacter
             int x = (int)(value % Convert.ToUInt64(length));
 
             pixel = pixels[x];
+            pixels.RemoveAt(x);
         }
-
-        pixels.Remove(pixel);
 
         Location loc = pixel.getLetterLocation(letter);
 
@@ -85,7 +73,7 @@ public class HexCharacter
     {
         if(pixels.Count < 10)
         {
-            parent.addPixels(10);
+            parent.addPixels(1000);
         }
     }
 }

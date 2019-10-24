@@ -12,11 +12,13 @@ public class PixelInformation
     private int x;
     private int y;
 
-    private List<String> usedCharacters = new List<String>();
-    private List<String> leftCharacters = new List<String>();
+    private int[] count = new int[16];
+    
+    private Dictionary<String, List<int>> letterLocations = new Dictionary<String, List<int>>();
 
     private string hexColor;
     private string hash;
+    private char[] breakDown;
 
     public PixelInformation(PixelManager par, int x, int y)
     {
@@ -26,55 +28,68 @@ public class PixelInformation
         this.y = y;
 
         getImageInformation();
-        addCharacters();
+        setupLetterMap();
+        breakDown = hash.ToCharArray();
     }
 
-    public int getLetterCount(String letter)
+    public int[] getLetterCount()
     {
-        int count = 0;
-
-        foreach(String s in leftCharacters)
-        {
-            if (s.Equals(letter)) count++;
-        }
-
         return count;
     }
 
     public Location getLetterLocation(String letter)
     {
-        int amountToSkip = getUsedLetterCount(letter);
-        int hashLocation = getHashLocation(letter, amountToSkip);
+        int hexNumber = Converter.hexToInt(letter);
 
-        if((getLetterCount(letter) <= 0) || (hashLocation == -1))
+        int hashLocation = letterLocations[letter][0];
+
+        if((count[hexNumber] <= 0) || (hashLocation == -1))
         {
             Console.Error.WriteLine("[ERROR]: System miscalculated, do not trust this encoding.");
             System.Environment.Exit(94);
         }
 
-        usedCharacters.Add(letter);
-        leftCharacters.Remove(letter);
+        letterLocations[letter].RemoveAt(0);
+        count[hexNumber]--;
 
         return new Location(x, y, hashLocation);
     }
 
     public string getLetter(int number)
     {
-        return hash.ToCharArray()[number].ToString();
+        return breakDown[number].ToString();
+    }
+
+    private void setupLetterMap()
+    {
+        for(int i = 0; i < 16; i++)
+        {
+            string hex = Converter.intToHex(i);
+
+            //For The Actual Class Management (Speed of Service)
+            letterLocations.Add(hex, new List<int>());
+
+            int location = 0;
+            int letterCount = 0;
+
+            foreach(Char c in hash)
+            {
+                if(c.ToString().Equals(hex))
+                {
+                    letterLocations[hex].Add(location);
+                    letterCount++;
+                }
+                location++;
+            }
+
+            //For The Parent System
+            count[i] = letterCount;
+        }
     }
 
     private void getImageInformation()
     {
-        Image image;
-
-        if(parent.getParent() == null)
-        {
-            image = parent.getParentDecoder().getParent().getImage();
-        }
-        else
-        {
-            image = parent.getParent().getParent().getImage();
-        }
+        Image image = parent.getParent().getImage();
 
         Color color = image.getPixel(x, y);
         hexColor = image.getColorHex(color);
@@ -90,47 +105,5 @@ public class PixelInformation
             byte[] hashBytes = sha512Hash.ComputeHash(sourceBytes);
             hash = BitConverter.ToString(hashBytes).Replace("-", String.Empty);
         }
-    }
-
-    private void addCharacters()
-    {
-        foreach(Char c in hash)
-        {
-            leftCharacters.Add(c.ToString());
-        }
-    }
-
-    private int getUsedLetterCount(String letter)
-    {
-        int count = 0;
-
-        foreach(String s in usedCharacters)
-        {
-            if (s.Equals(letter)) count++;
-        }
-
-        return count;
-    }
-
-    private int getHashLocation(string letter, int skipBy)
-    {
-        int count = 0;
-        int skipCount = 0;
-
-        foreach(Char c in hash)
-        {
-            if (c.ToString().Equals(letter))
-            {
-                if(skipCount >= skipBy)
-                {
-                    return count;
-                }
-
-                skipCount++;
-            }
-            count++;
-        }
-
-        return -1;
     }
 }
