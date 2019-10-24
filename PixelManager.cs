@@ -73,18 +73,16 @@ public class PixelManager
 
         foreach(Location loc in locations)
         {
+
             int x = Convert.ToInt32(loc.getX());
             int y = Convert.ToInt32(loc.getY());
             int hashLocation = Convert.ToInt32(loc.getHashLocation());
 
             if((x >= imageWidth) || (y >= imageHeight) || (hashLocation >= 128))
             {
-                Console.WriteLine("-");
                 Console.Error.WriteLine("[ERROR]: Decode file has invalid sizes.");
                 System.Environment.Exit(91);
             }
-
-            Console.Write("+");
 
             String key = x.ToString() + "-" + y.ToString();
 
@@ -100,8 +98,6 @@ public class PixelManager
 
             sb.Append(px.getLetter(hashLocation));
         }
-
-        Console.WriteLine("");
 
         return sb.ToString();
     }
@@ -143,11 +139,8 @@ public class PixelManager
                     //If it's duplicated we need a different one
                     catch(ArgumentException)
                     {
-                        Console.Write(".");
                         continue;
                     }
-
-                    Console.Write("+");
 
                     invalid = false;
 

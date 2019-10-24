@@ -18,6 +18,7 @@ public class PixelInformation
 
     private string hexColor;
     private string hash;
+    private char[] breakDown;
 
     public PixelInformation(PixelManager par, int x, int y)
     {
@@ -28,6 +29,7 @@ public class PixelInformation
 
         getImageInformation();
         setupLetterMap();
+        breakDown = hash.ToCharArray();
     }
 
     public int[] getLetterCount()
@@ -55,7 +57,7 @@ public class PixelInformation
 
     public string getLetter(int number)
     {
-        return hash.ToCharArray()[number].ToString();
+        return breakDown[number].ToString();
     }
 
     private void setupLetterMap()

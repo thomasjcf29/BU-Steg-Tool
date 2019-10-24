@@ -32,12 +32,19 @@ public class FrankDecoding : SteganographyManager
 
         while(!(getInputFile().isFileRead()))
         {
-            List<Location> locations = getInputFile().getBytes();
+            DateTime startBlock = DateTime.Now;
+            List<Location> locations = getInputFile().getLocations();
+            String hex = manager.decode(locations);
+            double totalBlockTime = (DateTime.Now - startBlock).TotalSeconds;
+            Console.WriteLine("\nThis has been completed in " + totalBlockTime.ToString("F1") + " seconds");
+            //Console.WriteLine(hex);
         }
 
-        double totalTime = (DateTime.Now - startTime).TotalMinutes;
+        close();
 
-        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " minutes");
+        double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
+
+        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
 
         //Console.WriteLine("");
         //String hex = manager.decode(locations);

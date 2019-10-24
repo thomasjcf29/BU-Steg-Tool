@@ -198,33 +198,41 @@ public class StegFileManager
             throw new ArgumentException("You cannot retrieve binary from a byte reader!");
         }
 
-        byte[] receivedData = new byte[4096];
-        byte[] actualData;
+        List<Location> list = new List<Location>();
 
-        int numBytesToRead = receivedData.Length;
-
-        int count = 0;
-
-        while (numBytesToRead > 0)
+        try
         {
-            // Read may return anything from 0 to numBytesToRead.
-            int n = bStream.Read(receivedData, 0, receivedData.Length);
-            // The end of the file is reached.
-            if (n == 0)
+            for(int i = 0; i < 1024; i++)
             {
-                fileRead = true;
-                break;
-            }
+                if((bReader.BaseStream.Length - bReader.BaseStream.Position) < 6)
+                {
+                    fileRead = true;
+                    break;
+                }
 
-            totalRead += n;
-            numBytesToRead -= n;
-            count += n;
+                //x,y,hashlocation
+                UInt16[] test = new UInt16[3];
+
+                for(int x = 0; x < 3; x++)
+                {
+                    test[x] = bReader.ReadUInt16();
+                }
+
+                Location loc = new Location(test[0], test[1], test[2]);
+
+                list.Add(loc);
+            }
+        }
+        catch(Exception ex) when
+        (
+            ex is IOException
+            || ex is ArgumentException
+        )
+        {
+            Console.Error.WriteLine("[ERROR]: Problem reading from file.");
         }
 
-        actualData = new byte[count];
-        Array.Copy(receivedData, actualData, actualData.Length);
-
-        return actualData;
+        return list;
     }
 
     private void checkValid(String location, Boolean operationMode)
