@@ -40,13 +40,5 @@ public class FrankDecoding : SteganographyManager
         double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
 
         Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
-
-        //Console.WriteLine("");
-        //String hex = manager.decode(locations);
-        //Console.WriteLine("Hex has been retreived.");
-
-        //Console.WriteLine("Converting back to ASCII.");
-        //String ascii = Converter.hexToAscii(hex);
-        //Console.WriteLine("Done.");
     }
 }
