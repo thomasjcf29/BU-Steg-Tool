@@ -5,6 +5,8 @@
 /.vs/*
 .vs/*
 .vs
+.idea/*
+.idea
 /bin/Debug/
 /bin/Debug/*
 /obj/Debug
