@@ -176,14 +176,19 @@ public class StegFileManager
         bWriter.Flush();
     }
 
-    public void writeToFile(String hex)
+    public void writeToFile(byte[] bytes)
     {
-        Console.WriteLine("Writing to file");
-
         if(action == FILE_TYPE.READ_FILE)
         {
             throw new ArgumentException("You cannot write to a file opened in read mode.");
         }
+
+        if(parent_action == SteganographyManager.ACTION.ENCODING)
+        {
+            throw new ArgumentException("You cannot write binary to a file opened in byte writing mode.");
+        }
+        
+        bStream.Write(bytes, 0, bytes.Length);
     }
 
     public List<Location> getLocations()
@@ -202,7 +207,7 @@ public class StegFileManager
 
         try
         {
-            for(int i = 0; i < 1024; i++)
+            for(int i = 0; i < 4096; i++)
             {
                 if((bReader.BaseStream.Length - bReader.BaseStream.Position) < 6)
                 {

@@ -70,18 +70,20 @@ public class PixelInformation
             letterLocations.Add(hex, new List<int>());
 
             int location = 0;
+            int letterCount = 0;
 
             foreach(Char c in hash)
             {
                 if(c.ToString().Equals(hex))
                 {
                     letterLocations[hex].Add(location);
+                    letterCount++;
                 }
                 location++;
             }
 
             //For The Parent System
-            count[i] = hash.Count(f => f == Convert.ToChar(Converter.intToHex(i)));
+            count[i] = letterCount;
         }
     }
 

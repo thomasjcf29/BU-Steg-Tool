@@ -94,6 +94,7 @@ public class PixelManager
             catch(KeyNotFoundException)
             {
                 px = new PixelInformation(this, x, y);
+                pixelMap.Add(key, px);
             }
 
             sb.Append(px.getLetter(hashLocation));
