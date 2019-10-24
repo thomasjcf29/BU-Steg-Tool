@@ -37,10 +37,7 @@ public class FrankDecoding : SteganographyManager
             String hex = manager.decode(locations);
             double totalBlockTime = (DateTime.Now - startBlock).TotalSeconds;
             Console.WriteLine("\nThis has been completed in " + totalBlockTime.ToString("F1") + " seconds");
-            //Console.WriteLine(hex);
         }
-
-        close();
 
         double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
 

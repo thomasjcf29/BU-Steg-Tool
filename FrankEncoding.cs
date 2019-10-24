@@ -38,8 +38,6 @@ public class FrankEncoding : SteganographyManager
             getOutputFile().writeToFile(locations);
         }
 
-        close();
-
         double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
 
         Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
