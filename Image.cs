@@ -22,7 +22,7 @@ namespace FrankStore
             return image.GetPixel(width, height);
         }
 
-        public string getColorHex(Color pixelColor)
+        public static string getColorHex(Color pixelColor)
         {
             return ColorTranslator.ToHtml(pixelColor);
         }

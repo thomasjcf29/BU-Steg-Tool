@@ -93,7 +93,7 @@ namespace FrankStore
             Image image = parent.getParent().getImage();
 
             var color = image.getPixel(x, y);
-            hexColor = image.getColorHex(color);
+            hexColor = Image.getColorHex(color);
 
             var source = new StringBuilder();
             source.Append(x.ToString());
