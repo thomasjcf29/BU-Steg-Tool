@@ -75,18 +75,9 @@ namespace FrankStore
         private void openFiles(string inputFile, string outputFile)
         {
             input = new StegFileManager(this, StegFileManager.FileType.ReadFile, inputFile);
-            if(input.isValid())
-            {
-                output = new StegFileManager(this, StegFileManager.FileType.WriteFile, outputFile);
-                if(!output.isValid())
-                {
-                    setValid(false);
-                }
-            }
-            else
-            {
-                setValid(false);
-            }
+            output = new StegFileManager(this, StegFileManager.FileType.WriteFile, outputFile);
+            
+            if(!input.isValid() || !output.isValid()) setValid(false);
         }
     }
 }
