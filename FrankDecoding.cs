@@ -3,7 +3,7 @@ using System;
 namespace FrankStore
 {
     /// <summary>
-    /// FrankDecoding Class is the decoding manager to ensure that the an encoded file is provided back to its original state.
+    /// <c>FrankDecoding</c> Class is the decoding manager to ensure that the an encoded file is provided back to its original state.
     /// </summary>
     /// <para>
     /// Provided of course that the end user has the same cover image that was used to encode the file.
