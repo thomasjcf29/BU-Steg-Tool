@@ -5,9 +5,9 @@ namespace FrankStore
 {
     public class Location
     {
-        private ushort xLocation;
-        private ushort yLocation;
-        private ushort hashLocation;
+        private readonly ushort xLocation;
+        private readonly ushort yLocation;
+        private readonly ushort hashLocation;
 
         public Location(ushort x, ushort y, ushort hashLoc)
         {
@@ -36,21 +36,6 @@ namespace FrankStore
         public ushort getHashLocation()
         {
             return hashLocation;
-        }
-
-        public void setX(ushort x)
-        {
-            xLocation = x;
-        }
-
-        public void setY(ushort y)
-        {
-            yLocation = y;
-        }
-
-        public void setHashLocation(ushort hash)
-        {
-            hashLocation = hash;
         }
 
         public override string ToString()
