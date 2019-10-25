@@ -50,12 +50,7 @@ namespace FrankStore
             return parent;
         }
 
-        public List<PixelInformation> getPixels()
-        {
-            return pixelMap.Values.ToList();
-        }
-
-        public List<Location> encode(string message)
+        public IEnumerable<Location> encode(string message)
         {
             return message.Select(c => characterBreakdown[c.ToString()].chooseHexCharacter()).ToList();
         }
@@ -125,11 +120,11 @@ namespace FrankStore
                         value = BitConverter.ToUInt64(data, 0);
                         var y = (int) (value % Convert.ToUInt64(imageHeight));
 
-                        var key = x.ToString() + "-" + y.ToString();
+                        var key = x + "-" + y;
 
                         try
                         {
-                            PixelInformation px = new PixelInformation(this, x, y);
+                            var px = new PixelInformation(this, x, y);
                             pixelMap.Add(key, px);
                         }
                         //If it's duplicated we need a different one
