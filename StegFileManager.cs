@@ -203,7 +203,7 @@ namespace FrankStore
             bStream.Write(bytes, 0, bytes.Length);
         }
 
-        public List<Location> getLocations()
+        public IEnumerable<Location> getLocations()
         {
             if (action == FileType.WriteFile)
             {
