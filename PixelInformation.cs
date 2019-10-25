@@ -90,7 +90,7 @@ namespace FrankStore
 
         private void getImageInformation()
         {
-            Image image = parent.getParent().getImage();
+            var image = parent.getParent().getImage();
 
             var color = image.getPixel(x, y);
             hexColor = Image.getColorHex(color);
@@ -104,7 +104,7 @@ namespace FrankStore
             {
                 var sourceBytes = Encoding.UTF8.GetBytes(source.ToString());
                 var hashBytes = sha512Hash.ComputeHash(sourceBytes);
-                hash = BitConverter.ToString(hashBytes).Replace("-", String.Empty);
+                hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
             }
         }
     }
