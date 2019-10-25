@@ -1,67 +1,68 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
-public class Location
+namespace FrankStore
 {
-    private UInt16 xLocation;
-    private UInt16 yLocation;
-    private UInt16 hashLocation;
-
-    public Location(UInt16 x, UInt16 y, UInt16 hashLoc)
+    public class Location
     {
-        xLocation = x;
-        yLocation = y;
-        hashLocation = hashLoc;
-    }
+        private ushort xLocation;
+        private ushort yLocation;
+        private ushort hashLocation;
 
-    public Location(int x, int y, int hashLoc)
-    {
-        xLocation = Convert.ToUInt16(x);
-        yLocation = Convert.ToUInt16(y);
-        hashLocation = Convert.ToUInt16(hashLoc);
-    }
+        public Location(ushort x, ushort y, ushort hashLoc)
+        {
+            xLocation = x;
+            yLocation = y;
+            hashLocation = hashLoc;
+        }
 
-    public UInt16 getX()
-    {
-        return xLocation;
-    }
+        public Location(int x, int y, int hashLoc)
+        {
+            xLocation = Convert.ToUInt16(x);
+            yLocation = Convert.ToUInt16(y);
+            hashLocation = Convert.ToUInt16(hashLoc);
+        }
 
-    public UInt16 getY()
-    {
-        return yLocation;
-    }
+        public ushort getX()
+        {
+            return xLocation;
+        }
 
-    public UInt16 getHashLocation()
-    {
-        return hashLocation;
-    }
+        public ushort getY()
+        {
+            return yLocation;
+        }
 
-    public void setX(UInt16 x)
-    {
-        xLocation = x;
-    }
+        public ushort getHashLocation()
+        {
+            return hashLocation;
+        }
 
-    public void setY(UInt16 y)
-    {
-        yLocation = y;
-    }
+        public void setX(ushort x)
+        {
+            xLocation = x;
+        }
 
-    public void setHashLocation(UInt16 hash)
-    {
-        hashLocation = hash;
-    }
+        public void setY(ushort y)
+        {
+            yLocation = y;
+        }
 
-    public override String ToString()
-    {
-        return new StringBuilder()
-                                .Append("X: ")
-                                .Append(xLocation.ToString())
-                                .Append(", Y: ")
-                                .Append(yLocation.ToString())
-                                .Append(", Hash: ")
-                                .Append(hashLocation.ToString())
-                                .ToString();
+        public void setHashLocation(ushort hash)
+        {
+            hashLocation = hash;
+        }
+
+        public override string ToString()
+        {
+            return new StringBuilder()
+                .Append("X: ")
+                .Append(xLocation.ToString())
+                .Append(", Y: ")
+                .Append(yLocation.ToString())
+                .Append(", Hash: ")
+                .Append(hashLocation.ToString())
+                .ToString();
+        }
     }
 }

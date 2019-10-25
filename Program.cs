@@ -1,92 +1,92 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
 
-public class Program
+namespace FrankStore
 {
-    private Boolean encoding;
-
-    static void Main(string[] args)
+    public class Program
     {
-        new Program(args);
-    }
+        private bool encoding;
 
-    public Program(string[] args)
-    {
-        Console.WriteLine("Welcome To FrankStore!");
-
-        if(!checkValidation(args))
+        // ReSharper disable once InconsistentNaming - Main method has to be capitals
+        public static void Main(string[] args)
         {
-            System.Environment.Exit(100);
+            // ReSharper disable once ObjectCreationAsStatement - Don't need to keep this assignment once it's done the program can close.
+            new Program(args);
         }
 
-        runTasks(args[1], args[2], args[3]);
-
-        Console.WriteLine("Operation completed, closing.");
-    }
-
-    private void runTasks(String coverFile, String inputFile, String outputFile)
-    {
-        if(encoding)
+        private Program(IReadOnlyList<string> args)
         {
-            Console.WriteLine("You have chosen to encode a file.");
+            Console.WriteLine("Welcome To FrankStore!");
 
-            FrankEncoding encoder = new FrankEncoding(coverFile, inputFile, outputFile);
-
-            if(encoder.isValid())
+            if (!checkValidation(args))
             {
+                Environment.Exit(100);
+            }
+
+            runTasks(args[1], args[2], args[3]);
+
+            Console.WriteLine("Operation completed, closing.");
+        }
+
+        private void runTasks(string coverFile, string inputFile, string outputFile)
+        {
+            if (encoding)
+            {
+                Console.WriteLine("You have chosen to encode a file.");
+
+                var encoder = new FrankEncoding(coverFile, inputFile, outputFile);
+
+                if (!encoder.isValid()) return;
+                
                 encoder.encode();
                 encoder.close();
             }
-        }
-        else
-        {
-            Console.WriteLine("You have chosen to decode a file.");
-
-            FrankDecoding decoder = new FrankDecoding(coverFile, inputFile, outputFile);
-
-            if(decoder.isValid())
+            else
             {
+                Console.WriteLine("You have chosen to decode a file.");
+
+                var decoder = new FrankDecoding(coverFile, inputFile, outputFile);
+
+                if (!decoder.isValid()) return;
+                
                 decoder.decode();
                 decoder.close();
             }
         }
-    }
 
-    private Boolean checkValidation(string[] args)
-    {
-        //Check to make sure all arguments are provided
-        if(args.Length != 4)
+        private bool checkValidation(IReadOnlyList<string> args)
         {
-            displayArguments();
-            return false;
+            //Check to make sure all arguments are provided
+            if (args.Count != 4)
+            {
+                displayArguments();
+                return false;
+            }
+
+            //Check to make sure encoding / decoding type is provided.
+            if (args[0].Equals("encode", StringComparison.InvariantCultureIgnoreCase))
+            {
+                encoding = true;
+            }
+            else if (args[0].Equals("decode", StringComparison.InvariantCultureIgnoreCase))
+            {
+                encoding = false;
+            }
+            else
+            {
+                displayArguments();
+                return false;
+            }
+
+            return true;
         }
 
-        //Check to make sure encoding / decoding type is provided.
-        if(args[0].Equals("encode", StringComparison.InvariantCultureIgnoreCase))
+        private static void displayArguments()
         {
-            encoding = true;
+            Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
+            Console.Error.WriteLine("The correct arguments are:");
+            Console.Error.WriteLine("To encode: FrankStore.exe encode <coverImage> <fileToEncode> <outputFile>");
+            Console.Error.WriteLine("To decode: FrankStore.exe decode <coverImage> <fileToDecode> <outputFile>");
         }
-        else if(args[0].Equals("decode", StringComparison.InvariantCultureIgnoreCase))
-        {
-            encoding = false;
-        }
-        else
-        {
-            displayArguments();
-            return false;
-        }
-
-        return true;
-    }
-
-    private void displayArguments()
-    {
-        Console.Error.WriteLine("[ERROR]: Please provide arguments to this program.");
-        Console.Error.WriteLine("The correct arguments are:");
-        Console.Error.WriteLine("To encode: FrankStore.exe encode <coverImage> <fileToEncode> <outputFile>");
-        Console.Error.WriteLine("To decode: FrankStore.exe decode <coverImage> <fileToDecode> <outputFile>");
     }
 }

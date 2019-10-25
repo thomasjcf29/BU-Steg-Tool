@@ -1,64 +1,66 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Drawing;
 using System.IO;
 
-public class Image
+namespace FrankStore
 {
-    private Bitmap image;
-
-    private Boolean valid = false;
-
-    public Image(String location) {
-        Console.WriteLine("Trying to open specified image cover.");
-
-        checkValid(location);
-    }
-
-    public Color getPixel(int width, int height)
+    public class Image
     {
-        return image.GetPixel(width, height);
-    }
+        private Bitmap image;
 
-    public String getColorHex(Color pixelColor)
-    {
-        return System.Drawing.ColorTranslator.ToHtml(pixelColor);
-    }
+        private bool valid;
 
-    public int getHeight()
-    {
-        return image.Height;
-    }
-
-    public int getWidth()
-    {
-        return image.Width;
-    }
-
-    public Boolean isValid()
-    {
-        return valid;
-    }
-
-    private void checkValid(String location){
-        if (!File.Exists(location))
+        public Image(string location)
         {
-            Console.Error.WriteLine("[ERROR]: File does not exist for specified image");
-            return;
+            Console.WriteLine("Trying to open specified image cover.");
+
+            checkValid(location);
         }
 
-        try
+        public Color getPixel(int width, int height)
         {
-            image = new Bitmap(location);
-        }
-        catch (ArgumentException)
-        {
-            Console.Error.WriteLine("[ERROR]: Specified image file is not valid, is it corrupted?");
-            return;
+            return image.GetPixel(width, height);
         }
 
-        valid = true;
+        public string getColorHex(Color pixelColor)
+        {
+            return ColorTranslator.ToHtml(pixelColor);
+        }
+
+        public int getHeight()
+        {
+            return image.Height;
+        }
+
+        public int getWidth()
+        {
+            return image.Width;
+        }
+
+        public bool isValid()
+        {
+            return valid;
+        }
+
+        private void checkValid(string location)
+        {
+            if (!File.Exists(location))
+            {
+                Console.Error.WriteLine("[ERROR]: File does not exist for specified image");
+                return;
+            }
+
+            try
+            {
+                image = new Bitmap(location);
+            }
+            catch (ArgumentException)
+            {
+                Console.Error.WriteLine("[ERROR]: Specified image file is not valid, is it corrupted?");
+                return;
+            }
+
+            valid = true;
+        }
     }
 }

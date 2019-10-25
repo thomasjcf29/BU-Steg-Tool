@@ -2,210 +2,204 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Drawing;
 using System.Security.Cryptography;
-using System.IO;
 
-public class PixelManager
+namespace FrankStore
 {
-    private SteganographyManager parent;
-
-    private int imageWidth;
-    private int imageHeight;
-    private Boolean valid = false;
-
-    Dictionary<String, HexCharacter> characterBreakdown = new Dictionary<String, HexCharacter>();
-    Dictionary<String, PixelInformation> pixelMap = new Dictionary<String, PixelInformation>();
-
-    public PixelManager(SteganographyManager managaer)
+    public class PixelManager
     {
-        Console.WriteLine("Initialising pixel manager.");
+        private readonly SteganographyManager parent;
 
-        parent = managaer;
+        private int imageWidth;
+        private int imageHeight;
+        private readonly bool valid;
 
-        //Setup Class Params
-        setupClass(true);
+        private readonly Dictionary<string, HexCharacter> characterBreakdown = new Dictionary<string, HexCharacter>();
+        private readonly Dictionary<string, PixelInformation> pixelMap = new Dictionary<string, PixelInformation>();
 
-        if(parent.getAction() == SteganographyManager.ACTION.ENCODING)
+        public PixelManager(SteganographyManager manager)
         {
-            //Setup Manager For Each Letter
-            setupHexCharacters();
+            Console.WriteLine("Initialising pixel manager.");
 
-            //Choose Initial Pixels
-            Console.WriteLine("Choosing 1000 random pixels (this may increase later on).");
-            addPixels(1000);
-            Console.WriteLine("");
-        }
+            parent = manager;
 
-        valid = true;
-    }
+            //Setup Class Params
+            setupClass();
 
-    public Boolean isValid()
-    {
-        return valid;
-    }
-
-    public SteganographyManager getParent()
-    {
-        return parent;
-    }
-
-    public List<PixelInformation> getPixels()
-    {
-        return pixelMap.Values.ToList();
-    }
-
-    public List<Location> encode(String message)
-    {
-        List<Location> locations = new List<Location>();
-        
-        foreach(char c in message)
-        {
-            locations.Add(characterBreakdown[c.ToString()].chooseHexCharacter());
-        }
-
-        return locations;
-    }
-
-    public string decode(List<Location> locations)
-    {
-        StringBuilder sb = new StringBuilder();
-
-        foreach(Location loc in locations)
-        {
-
-            int x = Convert.ToInt32(loc.getX());
-            int y = Convert.ToInt32(loc.getY());
-            int hashLocation = Convert.ToInt32(loc.getHashLocation());
-
-            if((x >= imageWidth) || (y >= imageHeight) || (hashLocation >= 128))
+            if (parent.getAction() == SteganographyManager.Action.Encoding)
             {
-                Console.Error.WriteLine("[ERROR]: Decode file has invalid sizes.");
-                System.Environment.Exit(91);
+                //Setup Manager For Each Letter
+                setupHexCharacters();
+
+                //Choose Initial Pixels
+                Console.WriteLine("Choosing 1000 random pixels (this may increase later on).");
+                addPixels(1000);
+                Console.WriteLine("");
             }
 
-            String key = x.ToString() + "-" + y.ToString();
-
-            PixelInformation px;
-
-            try{
-                px = pixelMap[key];
-            }
-            catch(KeyNotFoundException)
-            {
-                px = new PixelInformation(this, x, y);
-                pixelMap.Add(key, px);
-            }
-
-            sb.Append(px.getLetter(hashLocation));
+            valid = true;
         }
 
-        return sb.ToString();
-    }
-
-    public void addPixels(int amount)
-    {
-        if(((pixelMap.Count() + 1) + amount) > getImageSize())
+        public bool isValid()
         {
-            Console.Error.WriteLine("[ERROR]: This image is not large enough to hide the data, please start again with a bigger image.");
-            System.Environment.Exit(97);
+            return valid;
         }
 
-        using (RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider())
+        public SteganographyManager getParent()
         {
-            for (int i = 0; i < amount; i++)
-            {
-                byte[] data = new byte[100];
-                Boolean invalid = true;
+            return parent;
+        }
 
-                do
+        public List<PixelInformation> getPixels()
+        {
+            return pixelMap.Values.ToList();
+        }
+
+        public List<Location> encode(string message)
+        {
+            return message.Select(c => characterBreakdown[c.ToString()].chooseHexCharacter()).ToList();
+        }
+
+        public string decode(IEnumerable<Location> locations)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var loc in locations)
+            {
+
+                var x = Convert.ToInt32(loc.getX());
+                var y = Convert.ToInt32(loc.getY());
+                var hashLocation = Convert.ToInt32(loc.getHashLocation());
+
+                if (x >= imageWidth || y >= imageHeight || hashLocation >= 128)
                 {
-                    //X
-                    provider.GetBytes(data);
-                    ulong value = BitConverter.ToUInt64(data, 0);
-                    int x = (int)(value % Convert.ToUInt64(imageWidth));
+                    Console.Error.WriteLine("[ERROR]: Decode file has invalid sizes.");
+                    Environment.Exit(91);
+                }
 
-                    //Y
-                    provider.GetBytes(data);
-                    value = BitConverter.ToUInt64(data, 0);
-                    int y = (int)(value % Convert.ToUInt64(imageHeight));
+                var key = x + "-" + y;
 
-                    string key = x.ToString() + "-" + y.ToString();
+                PixelInformation px;
 
-                    try
-                    {
-                        PixelInformation px = new PixelInformation(this, x, y);
-                        pixelMap.Add(key, px);
-                    }
-                    //If it's duplicated we need a different one
-                    catch(ArgumentException)
-                    {
-                        continue;
-                    }
+                try
+                {
+                    px = pixelMap[key];
+                }
+                catch (KeyNotFoundException)
+                {
+                    px = new PixelInformation(this, x, y);
+                    pixelMap.Add(key, px);
+                }
 
-                    invalid = false;
-
-                } while (invalid);
+                sb.Append(px.getLetter(hashLocation));
             }
 
-            updateHexCharacters();
-        }
-    }
-
-    private int getImageSize()
-    {
-        return imageWidth * imageHeight;
-    }
-
-    private void updateHexCharacters()
-    {
-        List<PixelInformation>[] overall = new List<PixelInformation>[16];
-
-        for(int i = 0; i < 16; i++)
-        {
-            overall[i] = new List<PixelInformation>();
+            return sb.ToString();
         }
 
-        foreach(PixelInformation pi in pixelMap.Values.ToList())
+        public void addPixels(int amount)
         {
-            int[] count = pi.getLetterCount();
-
-            for(int i = 0; i < 16; i ++)
+            if (pixelMap.Count + 1 + amount > getImageSize())
             {
-                for(int y = 0; y < count[i]; y++)
+                Console.Error.WriteLine(
+                    "[ERROR]: This image is not large enough to hide the data, please start again with a bigger image.");
+                Environment.Exit(97);
+            }
+
+            using (var provider = new RNGCryptoServiceProvider())
+            {
+                for (var i = 0; i < amount; i++)
                 {
-                    overall[i].Add(pi);
+                    var data = new byte[100];
+                    var invalid = true;
+
+                    do
+                    {
+                        //X
+                        provider.GetBytes(data);
+                        var value = BitConverter.ToUInt64(data, 0);
+                        var x = (int) (value % Convert.ToUInt64(imageWidth));
+
+                        //Y
+                        provider.GetBytes(data);
+                        value = BitConverter.ToUInt64(data, 0);
+                        var y = (int) (value % Convert.ToUInt64(imageHeight));
+
+                        var key = x.ToString() + "-" + y.ToString();
+
+                        try
+                        {
+                            PixelInformation px = new PixelInformation(this, x, y);
+                            pixelMap.Add(key, px);
+                        }
+                        //If it's duplicated we need a different one
+                        catch (ArgumentException)
+                        {
+                            continue;
+                        }
+
+                        invalid = false;
+
+                    } while (invalid);
+                }
+
+                updateHexCharacters();
+            }
+        }
+
+        private int getImageSize()
+        {
+            return imageWidth * imageHeight;
+        }
+
+        private void updateHexCharacters()
+        {
+            var overall = new List<PixelInformation>[16];
+
+            for (var i = 0; i < 16; i++)
+            {
+                overall[i] = new List<PixelInformation>();
+            }
+
+            foreach (var pi in pixelMap.Values.ToList())
+            {
+                var count = pi.getLetterCount();
+
+                for (var i = 0; i < 16; i++)
+                {
+                    for (var y = 0; y < count[i]; y++)
+                    {
+                        overall[i].Add(pi);
+                    }
                 }
             }
+
+            for (var i = 0; i < 16; i++)
+            {
+                characterBreakdown[Converter.intToHex(i)].updatePixels(overall[i]);
+            }
         }
 
-        for(int i = 0; i < 16; i++)
+        private void setupClass()
         {
-            characterBreakdown[Converter.intToHex(i)].updatePixels(overall[i]);
-        }
-    }
+            Image image = parent.getImage();
 
-    private void setupClass(Boolean encoding)
-    {
-        Image image = parent.getImage();
+            imageWidth = image.getWidth();
+            imageHeight = image.getHeight();
 
-        imageWidth = image.getWidth();
-        imageHeight = image.getHeight();
-
-        if ((imageWidth * imageHeight) < 10)
-        {
+            if (imageWidth * imageHeight >= 10) return;
+            
             Console.Error.WriteLine("[ERROR]: The image does not have more than 10 pixels.");
-            return;
         }
-    }
 
-    private void setupHexCharacters()
-    {
-        for(int i = 0; i < 16; i++)
+        private void setupHexCharacters()
         {
-            string hex = Converter.intToHex(i);
-            HexCharacter hexC = new HexCharacter(this, hex);
-            characterBreakdown.Add(hex, hexC);
+            for (var i = 0; i < 16; i++)
+            {
+                var hex = Converter.intToHex(i);
+                var hexC = new HexCharacter(this, hex);
+                characterBreakdown.Add(hex, hexC);
+            }
         }
     }
 }

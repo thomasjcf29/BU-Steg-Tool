@@ -2,78 +2,80 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Linq;
-using System.Text;
-using System.Drawing;
-using System.IO;
 
-public class HexCharacter
+namespace FrankStore
 {
-    private PixelManager parent;
-
-    private List<PixelInformation> pixels = new List<PixelInformation>();
-
-    private string letter;
-
-    public HexCharacter(PixelManager par, string let)
+    public class HexCharacter
     {
-        parent = par;
-        letter = let;
-    }
+        private readonly PixelManager parent;
 
-    public void updatePixels(List<PixelInformation> px)
-    {
-        pixels.Clear();
-        pixels = px;
-    }
+        private List<PixelInformation> pixels = new List<PixelInformation>();
 
-    public Location chooseHexCharacter()
-    {
-        int length = pixels.Count;
+        private readonly string letter;
 
-        if(length == 0)
+        public HexCharacter(PixelManager par, string let)
         {
-            Console.Error.WriteLine("[ERROR]: There was a problem encoding the information, we have ran out of pixels.");
-            System.Environment.Exit(96);
+            parent = par;
+            letter = let;
         }
 
-        PixelInformation pixel;
-
-        using (RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider())
+        public void updatePixels(List<PixelInformation> px)
         {
-            byte[] data = new byte[100];
-
-            //Pixel To use
-            provider.GetBytes(data);
-            ulong value = BitConverter.ToUInt64(data, 0);
-            int x = (int)(value % Convert.ToUInt64(length));
-
-            pixel = pixels[x];
-            pixels.RemoveAt(x);
+            pixels.Clear();
+            pixels = px;
         }
 
-        Location loc = pixel.getLetterLocation(letter);
-
-        if(loc == null)
+        public Location chooseHexCharacter()
         {
-            Console.Error.WriteLine("[ERROR]: There was a problem generating the location information, do not trust this encoding.");
-            System.Environment.Exit(95);
+            var length = pixels.Count;
+
+            if (length == 0)
+            {
+                Console.Error.WriteLine(
+                    "[ERROR]: There was a problem encoding the information, we have ran out of pixels.");
+                Environment.Exit(96);
+            }
+
+            PixelInformation pixel;
+
+            using (var provider = new RNGCryptoServiceProvider())
+            {
+                var data = new byte[100];
+
+                //Pixel To use
+                provider.GetBytes(data);
+                var value = BitConverter.ToUInt64(data, 0);
+                var x = (int) (value % Convert.ToUInt64(length));
+
+                pixel = pixels[x];
+                pixels.RemoveAt(x);
+            }
+
+            var loc = pixel.getLetterLocation(letter);
+
+            if (loc == null)
+            {
+                Console.Error.WriteLine(
+                    "[ERROR]: There was a problem generating the location information, do not trust this encoding.");
+                Environment.Exit(95);
+            }
+
+            checkPixelCount();
+
+            return loc;
         }
 
-        checkPixelCount();
-
-        return loc;
-    }
-
-    public int getCount()
-    {
-        return pixels.Count();
-    }
-
-    private void checkPixelCount()
-    {
-        if(pixels.Count < 10)
+        public int getCount()
         {
-            parent.addPixels(1000);
+            return pixels.Count();
+        }
+
+        private void checkPixelCount()
+        {
+            if (pixels.Count < 10)
+            {
+                parent.addPixels(1000);
+            }
         }
     }
 }

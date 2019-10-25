@@ -1,93 +1,92 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
 
-public class SteganographyManager
+namespace FrankStore
 {
-    private Image coverImage;
-    private Boolean valid = false;
-    private ACTION performAction;
-
-    public enum ACTION {ENCODING, DECODING};
-
-    private StegFileManager input;
-    private StegFileManager output;
-
-    protected SteganographyManager(String file, ACTION performAction, String inputFile, String outputFile)
+    public class SteganographyManager
     {
-        this.performAction = performAction;
-        createImage(file);
-        if(isValid())
+        private Image coverImage;
+        private bool valid;
+        private readonly Action performAction;
+
+        public enum Action {Encoding, Decoding};
+
+        private StegFileManager input;
+        private StegFileManager output;
+
+        protected SteganographyManager(string file, Action performAction, string inputFile, string outputFile)
         {
-            openFiles(inputFile, outputFile);
-        }
-    }
-
-    public Boolean isValid()
-    {
-        return valid;
-    }
-
-    public Image getImage()
-    {
-        return coverImage;
-    }
-
-    public ACTION getAction()
-    {
-        return performAction;
-    }
-
-    public void close()
-    {
-        input.close();
-        output.close();
-    }
-
-    protected void setValid(Boolean state)
-    {
-        valid = state;
-    }
-
-    protected StegFileManager getInputFile()
-    {
-        return input;
-    }
-
-    protected StegFileManager getOutputFile()
-    {
-        return output;
-    }
-
-    private void createImage(String imageLocation)
-    {
-        coverImage = new Image(imageLocation);
-
-        if (!coverImage.isValid())
-        {
-            setValid(false);
-            System.Environment.Exit(99);
+            this.performAction = performAction;
+            createImage(file);
+            if(isValid())
+            {
+                openFiles(inputFile, outputFile);
+            }
         }
 
-        setValid(true);
-    }
-
-    private void openFiles(String inputFile, String outputFile)
-    {
-        input = new StegFileManager(this, StegFileManager.FILE_TYPE.READ_FILE, inputFile);
-        if(input.isValid())
+        public bool isValid()
         {
-            output = new StegFileManager(this, StegFileManager.FILE_TYPE.WRITE_FILE, outputFile);
-            if(!output.isValid())
+            return valid;
+        }
+
+        public Image getImage()
+        {
+            return coverImage;
+        }
+
+        public Action getAction()
+        {
+            return performAction;
+        }
+
+        public void close()
+        {
+            input.close();
+            output.close();
+        }
+
+        protected void setValid(bool state)
+        {
+            valid = state;
+        }
+
+        protected StegFileManager getInputFile()
+        {
+            return input;
+        }
+
+        protected StegFileManager getOutputFile()
+        {
+            return output;
+        }
+
+        private void createImage(string imageLocation)
+        {
+            coverImage = new Image(imageLocation);
+
+            if (!coverImage.isValid())
+            {
+                setValid(false);
+                Environment.Exit(99);
+            }
+
+            setValid(true);
+        }
+
+        private void openFiles(string inputFile, string outputFile)
+        {
+            input = new StegFileManager(this, StegFileManager.FileType.ReadFile, inputFile);
+            if(input.isValid())
+            {
+                output = new StegFileManager(this, StegFileManager.FileType.WriteFile, outputFile);
+                if(!output.isValid())
+                {
+                    setValid(false);
+                }
+            }
+            else
             {
                 setValid(false);
             }
-        }
-        else
-        {
-            setValid(false);
         }
     }
 }

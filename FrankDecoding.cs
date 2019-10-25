@@ -1,44 +1,41 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
 
-public class FrankDecoding : SteganographyManager
+namespace FrankStore
 {
-    private PixelManager manager;
-
-    public FrankDecoding(String coverFile, String inputFile, String outputFile)
-        : base(coverFile, SteganographyManager.ACTION.DECODING, inputFile, outputFile)
+    public class FrankDecoding : SteganographyManager
     {
-        if(isValid())
+        private readonly PixelManager manager;
+
+        public FrankDecoding(string coverFile, string inputFile, string outputFile)
+            : base(coverFile, Action.Decoding, inputFile, outputFile)
         {
+            if (!isValid()) return;
+            
             Console.WriteLine("Initialising decoder.");
 
             manager = new PixelManager(this);
 
-            if(!manager.isValid())
-            {
-                setValid(false);
-            }
+            if(manager.isValid()) return;
+            
+            setValid(false);
         }
-    }
 
-    public void decode()
-    {
-        DateTime startTime = DateTime.Now;
-
-        Console.WriteLine("Decoding and writing file, this may take a while!");
-
-        while(!(getInputFile().isFileRead()))
+        public void decode()
         {
-            List<Location> locations = getInputFile().getLocations();
-            byte[] bytes = Converter.hexToByte(manager.decode(locations));
-            getOutputFile().writeToFile(bytes);
+            var startTime = DateTime.Now;
+
+            Console.WriteLine("Decoding and writing file, this may take a while!");
+
+            while (!(getInputFile().isFileRead()))
+            {
+                var locations = getInputFile().getLocations();
+                var bytes = Converter.hexToByte(manager.decode(locations));
+                getOutputFile().writeToFile(bytes);
+            }
+
+            var totalTime = (DateTime.Now - startTime).TotalMilliseconds;
+
+            Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
         }
-
-        double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
-
-        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
     }
 }
