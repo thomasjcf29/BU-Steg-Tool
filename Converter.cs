@@ -3,7 +3,7 @@ using System.Text;
 
 namespace FrankStore
 {
-    public class Converter
+    public static class Converter
     {
         public static string byteToHex(byte[] input)
         {
@@ -37,23 +37,6 @@ namespace FrankStore
         public static int hexToInt(string input)
         {
             return int.Parse(input, System.Globalization.NumberStyles.HexNumber);
-        }
-
-        public static string hexToAscii(string input)
-        {
-            var sb = new StringBuilder();
-
-            for (var i = 0; i < input.Length; i += 2)
-            {
-                var charConvert = input.Substring(i, 2);
-
-                var lNumber = Convert.ToInt32(charConvert, 16);
-                var c = (char) lNumber;
-
-                sb.Append(c.ToString());
-            }
-
-            return sb.ToString();
         }
     }
 }
