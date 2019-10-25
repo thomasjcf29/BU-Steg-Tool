@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Linq;
 
 namespace FrankStore
 {
@@ -63,11 +62,6 @@ namespace FrankStore
             checkPixelCount();
 
             return loc;
-        }
-
-        public int getCount()
-        {
-            return pixels.Count();
         }
 
         private void checkPixelCount()
