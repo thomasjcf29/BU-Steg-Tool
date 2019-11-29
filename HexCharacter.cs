@@ -49,12 +49,20 @@ namespace FrankStore
             letter = let;
         }
 
+        /// <summary>
+        /// Updates the pixel list of all available pixels which can be used. Normally gets called when the amount of available pixels has been increased.
+        /// </summary>
+        /// <param name="px">List of pixels which can be used.</param>
         public void updatePixels(List<PixelInformation> px)
         {
             pixels.Clear();
             pixels = px;
         }
 
+        /// <summary>
+        /// Returns a location of the next hex character this class can provide.
+        /// </summary>
+        /// <returns>Location of next available hex character.</returns>
         public Location chooseHexCharacter()
         {
             var length = pixels.Count;
@@ -95,6 +103,9 @@ namespace FrankStore
             return loc;
         }
 
+        /// <summary>
+        /// Checks how many pixels are left for this character - if less than 10 - requests <c>PixelManager</c> to add some more.
+        /// </summary>
         private void checkPixelCount()
         {
             if (pixels.Count < 10)

@@ -4,15 +4,36 @@ using System.IO;
 
 namespace FrankStore
 {
+    /// <summary>
+    /// <c>StegFileManager</c> is incharge of reading from and writting to files.
+    /// What it does is dependent on the variables which are passed in.
+    /// </summary>
     public class StegFileManager
     {
+        /// <summary>
+        /// Boolean to if this class was successfully setup.
+        /// If false, do not use this class!
+        /// </summary>
         private bool valid;
+
+        /// <summary>
+        /// Enum of the whether this class is for reading or writing to the specified file.
+        /// </summary>
         private readonly FileType action;
+
+        /// <summary>
+        /// Enum of the SteganographyManagers (parents) choice of if it is for encoding or decoding.
+        /// </summary>
         private readonly SteganographyManager.Action parentAction;
 
-        //If Buffered Stream
+        /// <summary>
+        /// Determines that all of the file has been read.
+        /// </summary>
         private bool fileRead;
 
+        /// <summary>
+        ///  The lower layer file stream for both reading and writing to files.
+        /// </summary>
         private FileStream file;
 
         //The encode/decode files are read/written in binary.
@@ -22,12 +43,26 @@ namespace FrankStore
         //The file to encode / the output is read/written as a byte stream.
         private BufferedStream bStream;
 
+        /// <summary>
+        /// FileType of this specific file, either ReadFile or WriteFile.
+        /// </summary>
         public enum FileType
         {
             ReadFile,
             WriteFile
         };
 
+        /// <summary>
+        /// Constructor for the <c>StegFileManager</c> class, which will open/create the file and the relevant streamers.
+        /// There are four possible different actions which can be taked.
+        ///     1. Decoding Mode - Read File
+        ///     2. Decoding Mode - Write File
+        ///     3. Encoding Mode - Read File
+        ///     4. Encoding Mode - Write File
+        /// </summary>
+        /// <param name="parent">The parent <c>SteganographyManager</c> class.</param>
+        /// <param name="type">Type of file (read or write).</param>
+        /// <param name="location">Location of the file to be read / written to.</param>
         public StegFileManager(SteganographyManager parent, FileType type, string location)
         {
             parentAction = parent.getAction();
@@ -88,11 +123,19 @@ namespace FrankStore
             }
         }
 
+        /// <summary>
+        /// Returns the state of the class and if it was successfully setup.
+        /// Do not use the class if returned as false.
+        /// </summary>
+        /// <returns>True if successfully setup and false if not.</returns>
         public bool isValid()
         {
             return valid;
         }
 
+        /// <summary>
+        /// Closes the file and its relevant file streamer in use.
+        /// </summary>
         public void close()
         {
             switch (parentAction)
@@ -121,6 +164,11 @@ namespace FrankStore
             file = null;
         }
 
+        /// <summary>
+        /// Gets the next 4096 bytes of the file being read.
+        /// Will strip out any trailing zeros from the end if it runs out of file to read.
+        /// </summary>
+        /// <returns>Byte array of all text read so far.</returns>
         public byte[] getBytes()
         {
             if (action == FileType.WriteFile)
@@ -161,11 +209,20 @@ namespace FrankStore
             return actualData;
         }
 
+        /// <summary>
+        /// Tells you if you have read to the end of the file or not.
+        /// </summary>
+        /// <returns>True if file is completely read or false if not.</returns>
         public bool isFileRead()
         {
             return fileRead;
         }
 
+        /// <summary>
+        /// Writes to file the binary version of the list of locations provided.
+        /// For each location it writes the x, y, and hash location in a binary UINT16 format.
+        /// </summary>
+        /// <param name="locations">List of locations to be written.</param>
         public void writeToFile(IEnumerable<Location> locations)
         {
             if (action == FileType.ReadFile)
@@ -188,6 +245,10 @@ namespace FrankStore
             bWriter.Flush();
         }
 
+        /// <summary>
+        /// Writes to file the bytes of converted hex from decoding.
+        /// </summary>
+        /// <param name="bytes">When decoding the hex converted to bytes.</param>
         public void writeToFile(byte[] bytes)
         {
             if (action == FileType.ReadFile)
@@ -203,6 +264,11 @@ namespace FrankStore
             bStream.Write(bytes, 0, bytes.Length);
         }
 
+        /// <summary>
+        /// Returns 4096 locations at a time, which can then be proceesed and actioned accordingly.
+        /// For use during decoding.
+        /// </summary>
+        /// <returns>List of locations.</returns>
         public IEnumerable<Location> getLocations()
         {
             if (action == FileType.WriteFile)
@@ -253,6 +319,11 @@ namespace FrankStore
             return list;
         }
 
+        /// <summary>
+        /// Checks to make sure the file exists or doesn't exist depending on the operating mode.
+        /// </summary>
+        /// <param name="location">Location of the file to check.</param>
+        /// <param name="operationMode">True = encoding, false = decoding.</param>
         private void checkValid(string location, bool operationMode)
         {
             if (File.Exists(location) && operationMode)
@@ -270,6 +341,10 @@ namespace FrankStore
             valid = true;
         }
 
+        /// <summary>
+        /// Opens the file to be read from, no matter if it's for binary or byte stream.
+        /// </summary>
+        /// <param name="location">Location of the file to be opened.</param>
         private void openFile(string location)
         {
             try
@@ -315,11 +390,18 @@ namespace FrankStore
             }
         }
 
+        /// <summary>
+        /// Opens the binary reader to read from the file which has just been opened.
+        /// </summary>
         private void openBinaryReader()
         {
             bReader = new BinaryReader(file);
         }
 
+        /// <summary>
+        /// Creates the file to be written to.
+        /// </summary>
+        /// <param name="location">Location of file to write to.</param>
         private void createFile(string location)
         {
             try
@@ -350,16 +432,26 @@ namespace FrankStore
             }
         }
 
+        /// <summary>
+        /// Opens the binary writer on top of the file to be written to.
+        /// </summary>
         private void openBinaryWriter()
         {
             bWriter = new BinaryWriter(file);
         }
 
+        /// <summary>
+        /// Opens the buffered steam on top of the file which needs to be written or read to/from.
+        /// </summary>
         private void openBufferedStream()
         {
             bStream = new BufferedStream(file);
         }
 
+        /// <summary>
+        /// Writes to file the ushort number as binary.
+        /// </summary>
+        /// <param name="number">The number which should be written to the file.</param>
         private void writeToFile(ushort number)
         {
             try

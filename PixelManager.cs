@@ -6,17 +6,49 @@ using System.Security.Cryptography;
 
 namespace FrankStore
 {
+    /// <summary>
+    /// <c>PixelManager</c> is incharge of managing all the pixels during the encoding/decoding process.
+    /// </summary>
     public class PixelManager
     {
+        /// <summary>
+        /// Reference to the parent <c>SteganographyManager</c>.
+        /// </summary>
         private readonly SteganographyManager parent;
 
+        /// <summary>
+        /// Cover image total width.
+        /// </summary>
         private int imageWidth;
+
+        /// <summary>
+        /// Cover image total height.
+        /// </summary>
         private int imageHeight;
+
+        /// <summary>
+        /// Boolean status of whether this class was successfully setup, if false do not use.
+        /// </summary>
         private readonly bool valid;
 
+        /// <summary>
+        /// Contains a breakdown of all hex letters (0-F) and their <c>HexCharacter</c> manager.
+        /// </summary>
         private readonly Dictionary<string, HexCharacter> characterBreakdown = new Dictionary<string, HexCharacter>();
+
+        /// <summary>
+        /// Contains a map of pixel x,y locations to <c>PixelInformation</c>.
+        /// Useful for when decoding.
+        /// </summary>
         private readonly Dictionary<string, PixelInformation> pixelMap = new Dictionary<string, PixelInformation>();
 
+        /// <summary>
+        /// <c>PixelManager</c> initiliser, creates the class and returns it.
+        /// </summary>
+        /// <para>
+        /// It should be noted that if the action was created under encoding then it will generate 1000 random pixels to use.
+        /// </para>
+        /// <param name="manager">The parent manager <c>SteganographyManager</c> or any children.</param>
         public PixelManager(SteganographyManager manager)
         {
             Console.WriteLine("Initialising pixel manager.");
@@ -40,21 +72,39 @@ namespace FrankStore
             valid = true;
         }
 
+        /// <summary>
+        /// Returns whether this class was successfully setup or not, if false do not use!
+        /// </summary>
+        /// <returns>true for successfully setup, for false for not.</returns>
         public bool isValid()
         {
             return valid;
         }
 
+        /// <summary>
+        /// Gets the parent object who created this class.
+        /// </summary>
+        /// <returns><c>SteganographyManager</c> who created this class.</returns>
         public SteganographyManager getParent()
         {
             return parent;
         }
 
+        /// <summary>
+        /// Returns back all the locations for a specified hex message.
+        /// </summary>
+        /// <param name="message">The hex characters to be encoded.</param>
+        /// <returns>A list of locations to write to file.</returns>
         public IEnumerable<Location> encode(string message)
         {
             return message.Select(c => characterBreakdown[c.ToString()].chooseHexCharacter()).ToList();
         }
 
+        /// <summary>
+        /// Converts a list of locations back to their hex characters.
+        /// </summary>
+        /// <param name="locations">List of locations read from file.</param>
+        /// <returns>A string of hex characters.</returns>
         public string decode(IEnumerable<Location> locations)
         {
             var sb = new StringBuilder();
@@ -92,6 +142,10 @@ namespace FrankStore
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Adds more pixels from the original image file.
+        /// </summary>
+        /// <param name="amount">Amount of pixels to add from parent image.</param>
         public void addPixels(int amount)
         {
             if (pixelMap.Count + 1 + amount > getImageSize())
@@ -142,11 +196,19 @@ namespace FrankStore
             }
         }
 
+        /// <summary>
+        /// Generates the image size (width * height)
+        /// </summary>
+        /// <returns>Returns the image size (width * height)</returns>
         private int getImageSize()
         {
             return imageWidth * imageHeight;
         }
 
+        /// <summary>
+        /// Updates the <c>HexCharacter</c> with all pixels which can be used for that letter.
+        /// There are multiple pixel entries if a pixel can be used more than once.
+        /// </summary>
         private void updateHexCharacters()
         {
             var overall = new List<PixelInformation>[16];
@@ -175,6 +237,9 @@ namespace FrankStore
             }
         }
 
+        /// <summary>
+        /// Generic setup of the class to get parent image information and calculate basic information.
+        /// </summary>
         private void setupClass()
         {
             Image image = parent.getImage();
@@ -187,6 +252,9 @@ namespace FrankStore
             Console.Error.WriteLine("[ERROR]: The image does not have more than 10 pixels.");
         }
 
+        /// <summary>
+        /// Creates the basic hollow layout of the hex characters.
+        /// </summary>
         private void setupHexCharacters()
         {
             for (var i = 0; i < 16; i++)
