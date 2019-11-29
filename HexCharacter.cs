@@ -4,14 +4,45 @@ using System.Security.Cryptography;
 
 namespace FrankStore
 {
+    /// <summary>
+    /// <c>HexCharacter</c> is used to collect all the pixel locations for a certain hex character.
+    /// </summary>
+    /// <para>
+    /// This is important for example, if provided the hex letter "A". It needs to quickly find a location to use. This
+    /// class will find all the valid locations that can be used to store that information.
+    /// </para>
     public class HexCharacter
     {
+        /// <summary>
+        /// The parent <c>PixelManager</c> this is important to be able to get important objects like the Cover Image
+        /// (<c>Image</c>)
+        /// </summary>
         private readonly PixelManager parent;
 
+        /// <summary>
+        /// Holds a list of all pixels which can still be used to hide information for this letter.
+        /// </summary>
+        /// <para>
+        /// This is NOT a complete list of all pixels used so far, only the pixels which can still be used. This list
+        /// will also have the same amount of the same pixel object for how many times it can store the letter. For example,
+        /// if this specific instance was in charge of hex 'F', and one pixel could store F 16 times. That pixel would
+        /// be stored 16 times in this list.
+        /// </para>
         private List<PixelInformation> pixels = new List<PixelInformation>();
 
+        /// <summary>
+        /// The hex letter / number this class is in charge of hiding. For example ("F").
+        /// </summary>
         private readonly string letter;
 
+        /// <summary>
+        /// The constructor for the <c>HexCharacter</c> class which will return back a HexCharacter object.
+        /// </summary>
+        /// <param name="par">The PixelManager which initialised it.</param>
+        /// <param name="let">The letter this object is in charge of.</param>
+        /// <returns>
+        /// An initialised <c>HexCharacter</c> class.
+        /// </returns>
         public HexCharacter(PixelManager par, string let)
         {
             parent = par;
