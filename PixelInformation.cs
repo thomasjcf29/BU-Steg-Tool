@@ -1,109 +1,170 @@
 using System;
 using System.Security.Cryptography;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Drawing;
 
-public class PixelInformation
+namespace FrankStore
 {
-	private PixelManager parent;
-
-    private int x;
-    private int y;
-
-    private int[] count = new int[16];
-    
-    private Dictionary<String, List<int>> letterLocations = new Dictionary<String, List<int>>();
-
-    private string hexColor;
-    private string hash;
-    private char[] breakDown;
-
-    public PixelInformation(PixelManager par, int x, int y)
+    /// <summary>
+    /// <c>PixelInformation</c> is the class which manages the individual pixels and their attributes.
+    /// There is one class to each pixel to be used.
+    /// </summary>
+    public class PixelInformation
     {
-        parent = par;
+        /// <summary>
+        /// Reference to the parent (PixelManager).
+        /// </summary>
+        private readonly PixelManager parent;
 
-        this.x = x;
-        this.y = y;
+        /// <summary>
+        /// X Location of this pixel in the parent image.
+        /// </summary>
+        private readonly int x;
 
-        getImageInformation();
-        setupLetterMap();
-        breakDown = hash.ToCharArray();
-    }
+        /// <summary>
+        /// Y Location of this pixel in the parent image.
+        /// </summary>
+        private readonly int y;
 
-    public int[] getLetterCount()
-    {
-        return count;
-    }
+        /// <summary>
+        /// Breakdown of the count of hex letters 0-F.
+        /// </summary>
+        private readonly int[] count = new int[16];
 
-    public Location getLetterLocation(String letter)
-    {
-        int hexNumber = Converter.hexToInt(letter);
+        /// <summary>
+        /// Breakdown of all locations of each hex letter 0-F which hasn't been used so far.
+        /// </summary>
+        private readonly Dictionary<string, List<int>> letterLocations = new Dictionary<string, List<int>>();
 
-        int hashLocation = letterLocations[letter][0];
+        /// <summary>
+        /// Hex color of this pixel from the parent image.
+        /// </summary>
+        private string hexColor;
 
-        if((count[hexNumber] <= 0) || (hashLocation == -1))
+        /// <summary>
+        /// Hash of the pixel string (width-height-color).
+        /// </summary>
+        private string hash;
+
+        /// <summary>
+        /// Breakdown of the hash into a char array.
+        /// </summary>
+        private readonly char[] breakDown;
+
+        /// <summary>
+        /// <c>PixelInformation</c> initiliser takes the specified pixel and generates its unique information.
+        /// </summary>
+        /// <param name="par">Parent object (PixelManager)</param>
+        /// <param name="x">X Location of the pixel</param>
+        /// <param name="y">Y Location of the pixel</param>
+        /// <returns>Initilised <c>PixelInformation</c> class.</returns>
+        public PixelInformation(PixelManager par, int x, int y)
         {
-            Console.Error.WriteLine("[ERROR]: System miscalculated, do not trust this encoding.");
-            System.Environment.Exit(94);
+            parent = par;
+
+            this.x = x;
+            this.y = y;
+
+            getImageInformation();
+            setupLetterMap();
+            breakDown = hash.ToCharArray();
         }
 
-        letterLocations[letter].RemoveAt(0);
-        count[hexNumber]--;
-
-        return new Location(x, y, hashLocation);
-    }
-
-    public string getLetter(int number)
-    {
-        return breakDown[number].ToString();
-    }
-
-    private void setupLetterMap()
-    {
-        for(int i = 0; i < 16; i++)
+        /// <summary>
+        /// Returns the count of each hex letter 0-F which hasn't been used yet.
+        /// </summary>
+        /// <returns>Array of the count of letters 0-F.</returns>
+        public int[] getLetterCount()
         {
-            string hex = Converter.intToHex(i);
+            return count;
+        }
 
-            //For The Actual Class Management (Speed of Service)
-            letterLocations.Add(hex, new List<int>());
+        /// <summary>
+        /// Returns a location for a provided hex letter. The method will work out where next the letter comes in the hash and provide it as a location.
+        /// </summary>
+        /// <param name="letter">Letter to be returned as a location.</param>
+        /// <returns><c>Location</c> of the letter ready to be written to file.</returns>
+        public Location getLetterLocation(string letter)
+        {
+            var hexNumber = Converter.hexToInt(letter);
 
-            int location = 0;
-            int letterCount = 0;
+            var hashLocation = letterLocations[letter][0];
 
-            foreach(Char c in hash)
+            if ((count[hexNumber] <= 0) || (hashLocation == -1))
             {
-                if(c.ToString().Equals(hex))
-                {
-                    letterLocations[hex].Add(location);
-                    letterCount++;
-                }
-                location++;
+                Console.Error.WriteLine("[ERROR]: System miscalculated, do not trust this encoding.");
+                Environment.Exit(94);
             }
 
-            //For The Parent System
-            count[i] = letterCount;
+            letterLocations[letter].RemoveAt(0);
+            count[hexNumber]--;
+
+            return new Location(x, y, hashLocation);
         }
-    }
 
-    private void getImageInformation()
-    {
-        Image image = parent.getParent().getImage();
-
-        Color color = image.getPixel(x, y);
-        hexColor = image.getColorHex(color);
-
-        StringBuilder source = new StringBuilder();
-        source.Append(x.ToString());
-        source.Append(y.ToString());
-        source.Append(hexColor);
-
-        using (SHA512 sha512Hash = SHA512.Create())
+        /// <summary>
+        /// Returns a hex letter from a provided hash location.
+        /// </summary>
+        /// <param name="number">Hash location to return letter from.</param>
+        /// <returns>A string of the hex letter at the provided hash location.</returns>
+        public string getLetter(int number)
         {
-            byte[] sourceBytes = Encoding.UTF8.GetBytes(source.ToString());
-            byte[] hashBytes = sha512Hash.ComputeHash(sourceBytes);
-            hash = BitConverter.ToString(hashBytes).Replace("-", String.Empty);
+            return breakDown[number].ToString();
+        }
+
+        /// <summary>
+        /// This method maps out all hex letters 0-F to all possible locations in the hash.
+        /// This makes it easier later on to quickly get a location for a specified hex letter.
+        /// </summary>
+        private void setupLetterMap()
+        {
+            for (var i = 0; i < 16; i++)
+            {
+                var hex = Converter.intToHex(i);
+
+                //For The Actual Class Management (Speed of Service)
+                letterLocations.Add(hex, new List<int>());
+
+                var location = 0;
+                var letterCount = 0;
+
+                foreach (var c in hash)
+                {
+                    if (c.ToString().Equals(hex))
+                    {
+                        letterLocations[hex].Add(location);
+                        letterCount++;
+                    }
+
+                    location++;
+                }
+
+                //For The Parent System
+                count[i] = letterCount;
+            }
+        }
+
+        /// <summary>
+        /// This method generates the hash of the specified pixel.
+        /// </summary>
+        private void getImageInformation()
+        {
+            var image = parent.getParent().getImage();
+
+            var color = image.getPixel(x, y);
+            hexColor = Image.getColorHex(color);
+
+            var source = new StringBuilder();
+            source.Append(x.ToString());
+            source.Append(y.ToString());
+            source.Append(hexColor);
+
+            using (var sha512Hash = SHA512.Create())
+            {
+                var sourceBytes = Encoding.UTF8.GetBytes(source.ToString());
+                var hashBytes = sha512Hash.ComputeHash(sourceBytes);
+                hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
+            }
         }
     }
 }

@@ -1,44 +1,60 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
 
-public class FrankDecoding : SteganographyManager
+namespace FrankStore
 {
-    private PixelManager manager;
-
-    public FrankDecoding(String coverFile, String inputFile, String outputFile)
-        : base(coverFile, SteganographyManager.ACTION.DECODING, inputFile, outputFile)
+    /// <summary>
+    /// <c>FrankDecoding</c> Class is the decoding manager to ensure that the an encoded file is provided back to its original state.
+    /// </summary>
+    /// <para>
+    /// Provided of course that the end user has the same cover image that was used to encode the file.
+    /// </para>
+    public class FrankDecoding : SteganographyManager
     {
-        if(isValid())
+        /// <summary>
+        /// Reference to the child pixel manager, this is the manager which will hold / manage all the pixel information.
+        /// </summary>
+        private readonly PixelManager manager;
+
+        /// <summary>
+        /// The constructor for the <c>FrankDecoding</c> class, this will initialise the class with all the required values.
+        /// </summary>
+        /// <param name="coverFile">The file used to decode the information (the image key).</param>
+        /// <param name="inputFile">The file you want to decode.</param>
+        /// <param name="outputFile">The file you would like to output it to.</param>
+        /// <returns>An initialised <c>FrankDecoding</c> object.</returns>
+        public FrankDecoding(string coverFile, string inputFile, string outputFile)
+            : base(coverFile, Action.Decoding, inputFile, outputFile)
         {
+            if (!isValid()) return;
+            
             Console.WriteLine("Initialising decoder.");
 
             manager = new PixelManager(this);
 
-            if(!manager.isValid())
-            {
-                setValid(false);
-            }
+            if(manager.isValid()) return;
+            
+            setValid(false);
         }
-    }
 
-    public void decode()
-    {
-        DateTime startTime = DateTime.Now;
-
-        Console.WriteLine("Decoding and writing file, this may take a while!");
-
-        while(!(getInputFile().isFileRead()))
+        /// <summary>
+        /// The decode method will begin reading the encoded file, parsing it and then outputting it to the decoded file.
+        /// </summary>
+        public void decode()
         {
-            List<Location> locations = getInputFile().getLocations();
-            byte[] bytes = Converter.hexToByte(manager.decode(locations));
-            getOutputFile().writeToFile(bytes);
+            var startTime = DateTime.Now;
+
+            Console.WriteLine("Decoding and writing file, this may take a while!");
+
+            while (!(getInputFile().isFileRead()))
+            {
+                var locations = getInputFile().getLocations();
+                var bytes = Converter.hexToByte(manager.decode(locations));
+                getOutputFile().writeToFile(bytes);
+            }
+
+            var totalTime = (DateTime.Now - startTime).TotalMilliseconds;
+
+            Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
         }
-
-        double totalTime = (DateTime.Now - startTime).TotalMilliseconds;
-
-        Console.WriteLine("\nThis has been completed in " + totalTime.ToString("F1") + " milliseconds");
     }
 }

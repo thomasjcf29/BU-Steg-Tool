@@ -1,59 +1,75 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Drawing;
-using System.IO;
 
-public class Converter
-{   
-    public static string byteToHex(byte[] input)
+namespace FrankStore
+{
+    /// <summary>
+    /// Class <c>Converter</c> is in charge of converting from specified inputs to outputs.
+    /// </summary>
+    /// <para>
+    /// For example, this class can convert byte to hex and back as well as hex to int.
+    /// </para>
+    public static class Converter
     {
-        StringBuilder sb = new StringBuilder();
-
-        foreach (byte b in input)
+        /// <summary>
+        /// Returns back the hex representation of the provided bytes.
+        /// </summary>
+        /// <param name="input">Bytes you wish to convert to their hex representation.</param>
+        /// <returns>Hex representation of the provided bytes.</returns>
+        public static string byteToHex(IEnumerable<byte> input)
         {
-            sb.Append(string.Format("{0:X2}", b));
+            var sb = new StringBuilder();
+
+            foreach (var b in input)
+            {
+                sb.Append($"{b:X2}");
+            }
+
+            return sb.ToString();
         }
 
-        return sb.ToString();
-    }
-
-    public static byte[] hexToByte(String input)
-    {
-        int charNumber = input.Length;
-        byte[] bytes = new byte[charNumber / 2];
-        for(int i = 0; i < charNumber; i += 2)
+        /// <summary>
+        /// Returns back the byte[] representation of the provided hex.
+        /// </summary>
+        /// <param name="input">Hex you wish to convert to their bytes representation.</param>
+        /// <returns>Byte representation of the hex you provided.</returns>
+        public static byte[] hexToByte(string input)
         {
-            bytes[i/2] = Convert.ToByte(input.Substring(i, 2), 16);
-        }
-        return bytes;
-    }
+            var charNumber = input.Length;
+            var bytes = new byte[charNumber / 2];
+            for (var i = 0; i < charNumber; i += 2)
+            {
+                bytes[i / 2] = Convert.ToByte(input.Substring(i, 2), 16);
+            }
 
-    public static string intToHex(int input)
-    {
-        return input.ToString("X");
-    }
-
-    public static int hexToInt(string input)
-    {
-        return int.Parse(input, System.Globalization.NumberStyles.HexNumber);
-    }
-
-    public static string hexToAscii(string input)
-    {
-        StringBuilder sb = new StringBuilder();
-
-        for(int i = 0; i < input.Length; i = i + 2)
-        {
-            string charConvert = input.Substring(i, 2);
-
-            int lNumber = Convert.ToInt32(charConvert, 16);
-            char c = (char) lNumber;
-
-            sb.Append(c.ToString());
+            return bytes;
         }
 
-        return sb.ToString();
+        /// <summary>
+        /// Returns back the hex representation of the int you provided.
+        /// </summary>
+        /// <para>
+        /// I.E. 0 = 0, 16 = F.
+        /// </para>
+        /// <param name="input">Int you would like to convert to hex.</param>
+        /// <returns>Hex representation of the int you provided.</returns>
+        public static string intToHex(int input)
+        {
+            return input.ToString("X");
+        }
+
+        /// <summary>
+        /// Returns back the int representation of the hex you provided.
+        /// </summary>
+        /// <para>
+        /// I.E. F = 16, 0 = 0.
+        /// </para>
+        /// <param name="input">Hex you would like to convert to an int.</param>
+        /// <returns>Int representation of the hex you provided.</returns>
+        public static int hexToInt(string input)
+        {
+            return int.Parse(input, System.Globalization.NumberStyles.HexNumber);
+        }
     }
 }
